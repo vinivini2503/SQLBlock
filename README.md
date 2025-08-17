@@ -1,3 +1,1 @@
-<<<<<<< HEAD
-# AAA
->>>>>>> origin/main
+Finalmente projeto criado!
