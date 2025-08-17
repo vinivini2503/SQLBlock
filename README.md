@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # .
 
 This template should help get you started developing with Vue 3 in Vite.
@@ -33,3 +34,12 @@ npm run build
 ```sh
 npm run lint
 ```
+=======
+# SQLBlock
+SQL Block, it's a final project of my course
+>>>>>>> 3272877672448bc9466faba284211e3472f12895
+Este é o README que eu criei no meu computador para o projeto SQLBlock.
+=======
+# SQLBlock
+A new repository for my TCC project.
+>>>>>>> origin/main
