@@ -1,8 +1,20 @@
 {
   "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "strict": true,
+    "jsx": "preserve",
+    "allowSyntheticDefaultImports": true,
+    "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
-    }
+      "@/*": ["src/*"]
+    },
+    "types": ["vite/client"],
+    "experimentalDecorators": true
   },
-  "exclude": ["node_modules", "dist"]
+  "vueCompilerOptions": {
+    "globalTypesPath": "./.vscode/vue-global.d.ts"
+  },
+  "include": ["src/**/*.js", "src/**/*.vue", "src/**/*.ts"]
 }
