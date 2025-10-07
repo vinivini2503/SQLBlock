@@ -12,7 +12,7 @@
 
 <script>
 import * as Blockly from 'blockly/core'
-import { registerBlocks } from '@/blockly/customBlocks'
+import { registerBlocks } from './blockly/customBlocks'
 
 export default {
   name: 'BlocklyView',

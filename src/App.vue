@@ -4,5 +4,5 @@
 </template>
 
 <script setup>
-import BlocklyView from "./BlocklyView.vue";
+import BlocklyView from './BlocklyView.vue'
 </script>
