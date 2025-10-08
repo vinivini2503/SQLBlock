@@ -1,0 +1,40 @@
+{
+  "kind": "categoryToolbox",
+  "contents": [
+    {
+      "kind": "category",
+      "name": "Criar Tabela",
+      "colour": "#4CAF50",
+      "contents": [
+        { "kind": "block", "type": "criar_tabela" }
+      ]
+    },
+    {
+      "kind": "category",
+      "name": "Inserir Dados",
+      "colour": "#FFC107",
+      "contents": [
+        { "kind": "block", "type": "inserir_dados" }
+      ]
+    },
+    {
+      "kind": "category",
+      "name": "Selecionar Dados",
+      "colour": "#2196F3",
+      "contents": [
+        { "kind": "block", "type": "selecionar_dados" },
+        { "kind": "block", "type": "condicao_simples" }
+      ]
+    },
+    {
+      "kind": "category",
+      "name": "Atualizar / Deletar",
+      "colour": "#F44336",
+      "contents": [
+        { "kind": "block", "type": "atualizar_registros" },
+        { "kind": "block", "type": "deletar_registros" },
+        { "kind": "block", "type": "deletar_todos" }
+      ]
+    }
+  ]
+}
