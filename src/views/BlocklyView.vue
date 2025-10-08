@@ -21,8 +21,7 @@ export default {
     }
   },
   mounted() {
-    registerAllBlocks() // registra todos os blocos criados
-
+    registerAllBlocks()
     this.workspace = Blockly.inject(this.$refs.blocklyDiv, {
       toolbox: toolbox,
       trashcan: true,

@@ -1,12 +1,8 @@
 import * as Blockly from 'blockly/core';
 
-/**
- * Blocos relacionados à inserção de dados nas tabelas.
- * Escritos em português simples, com foco em leitura fácil para estudantes PcD.
- */
 export function registerInsertBlocks() {
 
-  // 🧱 Bloco principal: Inserir dados na tabela
+  // Bloco principal: Inserir dados na tabela
   Blockly.Blocks['inserir_dados'] = {
     init: function () {
       this.appendDummyInput()
@@ -21,7 +17,7 @@ export function registerInsertBlocks() {
     }
   };
 
-  // 🧱 Gerador SQL do bloco "inserir_dados"
+  //  Gerador SQL do bloco "inserir_dados"
   Blockly.JavaScript['inserir_dados'] = function (block) {
     const tableName = block.getFieldValue('table_name');
     const values = Blockly.JavaScript.statementToCode(block, 'valores');
@@ -30,7 +26,7 @@ export function registerInsertBlocks() {
     return code;
   };
 
-  // 🧩 Bloco: Valor a ser inserido
+  // Bloco: Valor a ser inserido
   Blockly.Blocks['valor_inserir'] = {
     init: function () {
       this.appendDummyInput()
@@ -44,7 +40,7 @@ export function registerInsertBlocks() {
     }
   };
 
-  // 🧱 Gerador SQL do bloco "valor_inserir"
+  // Gerador SQL do bloco "valor_inserir"
   Blockly.JavaScript['valor_inserir'] = function (block) {
     const values = block.getFieldValue('values');
     return `(${values})\n`;

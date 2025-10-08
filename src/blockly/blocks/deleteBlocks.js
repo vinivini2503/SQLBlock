@@ -1,12 +1,8 @@
 import * as Blockly from 'blockly/core';
 
-/**
- * Blocos relacionados à exclusão de dados ou tabelas.
- * Escritos em português simples para fácil compreensão.
- */
 export function registerDeleteBlocks() {
 
-  // 🧱 Bloco: Deletar registros de uma tabela com condição
+  // Bloco: Deletar registros de uma tabela com condição
   Blockly.Blocks['deletar_registros'] = {
     init: function () {
       this.appendDummyInput()
@@ -21,7 +17,7 @@ export function registerDeleteBlocks() {
     }
   };
 
-  // 🧱 Gerador SQL: deletar_registros
+  // Gerador SQL: deletar_registros
   Blockly.JavaScript['deletar_registros'] = function (block) {
     const tableName = block.getFieldValue('table_name');
     const condition = Blockly.JavaScript.valueToCode(block, 'condicao', Blockly.JavaScript.ORDER_ATOMIC);
@@ -29,7 +25,7 @@ export function registerDeleteBlocks() {
     return code;
   };
 
-  // 🧱 Bloco: Deletar todos os registros de uma tabela
+  // Bloco: Deletar todos os registros de uma tabela
   Blockly.Blocks['deletar_todos'] = {
     init: function () {
       this.appendDummyInput()
@@ -41,14 +37,14 @@ export function registerDeleteBlocks() {
     }
   };
 
-  // 🧱 Gerador SQL: deletar_todos
+  // Gerador SQL: deletar_todos
   Blockly.JavaScript['deletar_todos'] = function (block) {
     const tableName = block.getFieldValue('table_name');
     const code = `DELETE FROM ${tableName};\n`;
     return code;
   };
 
-  // 🧱 Bloco: Deletar tabela inteira
+  // Bloco: Deletar tabela inteira
   Blockly.Blocks['deletar_tabela'] = {
     init: function () {
       this.appendDummyInput()
@@ -60,14 +56,14 @@ export function registerDeleteBlocks() {
     }
   };
 
-  // 🧱 Gerador SQL: deletar_tabela
+  // Gerador SQL: deletar_tabela
   Blockly.JavaScript['deletar_tabela'] = function (block) {
     const tableName = block.getFieldValue('table_name');
     const code = `DROP TABLE ${tableName};\n`;
     return code;
   };
 
-  // 🧩 Bloco: Condição simples (reuso)
+  // Bloco: Condição simples (reuso)
   Blockly.Blocks['condicao_simples_delete'] = {
     init: function () {
       this.appendDummyInput()
@@ -87,7 +83,7 @@ export function registerDeleteBlocks() {
     }
   };
 
-  // 🧱 Gerador SQL: condicao_simples_delete
+  // Gerador SQL: condicao_simples_delete
   Blockly.JavaScript['condicao_simples_delete'] = function (block) {
     const column = block.getFieldValue('column');
     const operator = block.getFieldValue('operator');

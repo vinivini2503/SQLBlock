@@ -1,12 +1,9 @@
 import * as Blockly from 'blockly/core';
 
-/**
- * Blocos relacionados à atualização de dados em tabelas.
- * Linguagem simples e acessível para estudantes PcD.
- */
+
 export function registerUpdateBlocks() {
 
-  // 🧱 Bloco principal: Atualizar dados na tabela
+  // Bloco principal: Atualizar dados na tabela
   Blockly.Blocks['atualizar_dados'] = {
     init: function () {
       this.appendDummyInput()
@@ -24,7 +21,7 @@ export function registerUpdateBlocks() {
     }
   };
 
-  // 🧱 Gerador SQL: atualizar_dados
+  // Gerador SQL: atualizar_dados
   Blockly.JavaScript['atualizar_dados'] = function (block) {
     const tableName = block.getFieldValue('table_name');
     const newValues = Blockly.JavaScript.statementToCode(block, 'novos_valores').trim();
@@ -33,7 +30,7 @@ export function registerUpdateBlocks() {
     return code;
   };
 
-  // 🧩 Bloco: Novo valor para coluna
+  // Bloco: Novo valor para coluna
   Blockly.Blocks['novo_valor'] = {
     init: function () {
       this.appendDummyInput()
@@ -48,15 +45,14 @@ export function registerUpdateBlocks() {
       this.setHelpUrl("");
     }
   };
-
-  // 🧱 Gerador SQL: novo_valor
+  // Gerador SQL: novo_valor
   Blockly.JavaScript['novo_valor'] = function (block) {
     const column = block.getFieldValue('column');
     const value = block.getFieldValue('value');
     return `${column} = ${value},\n`;
   };
 
-  // 🧩 Bloco: Condição simples (reuso de selectBlocks)
+  // Bloco: Condição simples (reuso de selectBlocks)
   Blockly.Blocks['condicao_simples_update'] = {
     init: function () {
       this.appendDummyInput()
@@ -76,7 +72,7 @@ export function registerUpdateBlocks() {
     }
   };
 
-  // 🧱 Gerador SQL: condicao_simples_update
+  // Gerador SQL: condicao_simples_update
   Blockly.JavaScript['condicao_simples_update'] = function (block) {
     const column = block.getFieldValue('column');
     const operator = block.getFieldValue('operator');

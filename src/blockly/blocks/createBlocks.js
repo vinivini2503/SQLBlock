@@ -1,9 +1,5 @@
 import * as Blockly from 'blockly/core';
 
-/**
- * Blocos relacionados à criação de tabelas no banco de dados.
- * Todos os textos estão em português simples para facilitar a compreensão.
- */
 export function registerCreateBlocks() {
   //  Bloco: Criar Tabela
   Blockly.Blocks['criar_tabela'] = {

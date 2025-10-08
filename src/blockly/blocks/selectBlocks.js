@@ -6,7 +6,7 @@ import * as Blockly from 'blockly/core';
  */
 export function registerSelectBlocks() {
 
-  // 🧱 Bloco: Selecionar todos os registros de uma tabela
+  // Bloco: Selecionar todos os registros de uma tabela
   Blockly.Blocks['selecionar_tudo'] = {
     init: function () {
       this.appendDummyInput()
@@ -18,14 +18,14 @@ export function registerSelectBlocks() {
     }
   };
 
-  // 🧱 Gerador SQL: selecionar_tudo
+  // Gerador SQL: selecionar_tudo
   Blockly.JavaScript['selecionar_tudo'] = function (block) {
     const tableName = block.getFieldValue('table_name');
     const code = `SELECT * FROM ${tableName};\n`;
     return code;
   };
 
-  // 🧩 Bloco: Selecionar colunas específicas
+  // Bloco: Selecionar colunas específicas
   Blockly.Blocks['selecionar_colunas'] = {
     init: function () {
       this.appendDummyInput()
@@ -39,7 +39,7 @@ export function registerSelectBlocks() {
     }
   };
 
-  // 🧱 Gerador SQL: selecionar_colunas
+  // Gerador SQL: selecionar_colunas
   Blockly.JavaScript['selecionar_colunas'] = function (block) {
     const columns = block.getFieldValue('columns');
     const tableName = block.getFieldValue('table_name');
@@ -47,7 +47,7 @@ export function registerSelectBlocks() {
     return code;
   };
 
-  // 🧩 Bloco: Selecionar com condição (WHERE)
+  //  Bloco: Selecionar com condição (WHERE)
   Blockly.Blocks['selecionar_com_condicao'] = {
     init: function () {
       this.appendDummyInput()
@@ -62,7 +62,7 @@ export function registerSelectBlocks() {
     }
   };
 
-  // 🧱 Gerador SQL: selecionar_com_condicao
+  // Gerador SQL: selecionar_com_condicao
   Blockly.JavaScript['selecionar_com_condicao'] = function (block) {
     const tableName = block.getFieldValue('table_name');
     const condition = Blockly.JavaScript.valueToCode(block, 'condicao', Blockly.JavaScript.ORDER_ATOMIC);
@@ -70,7 +70,7 @@ export function registerSelectBlocks() {
     return code;
   };
 
-  // 🧩 Bloco: Condição simples (ex: idade > 18)
+  // Bloco: Condição simples (ex: idade > 18)
   Blockly.Blocks['condicao_simples'] = {
     init: function () {
       this.appendDummyInput()
@@ -90,7 +90,7 @@ export function registerSelectBlocks() {
     }
   };
 
-  // 🧱 Gerador SQL: condicao_simples
+  // Gerador SQL: condicao_simples
   Blockly.JavaScript['condicao_simples'] = function (block) {
     const column = block.getFieldValue('column');
     const operator = block.getFieldValue('operator');
