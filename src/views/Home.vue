@@ -4,7 +4,6 @@
       <div class="logo-wrapper">
         <svg
           class="logo-icon"
-          xmlns="http://www.w3.org/2000/sv"
           width="64"
           height="64"
           viewBox="0 0 24 24"
@@ -89,8 +88,6 @@ export default {
 </script>
 
 <style scoped>
-/* Estilos específicos para este componente */
-
 .login-container {
   display: flex;
   justify-content: center;
@@ -110,23 +107,23 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 16px; /* Espaço entre o ícone e o texto */
+  gap: 16px;
 }
 
 .logo-icon {
-  color: #3b82f6; /* Azul do botão */
+  color: #3b82f6;
 }
 
 .title {
-  font-size: 3rem; /* 48px */
+  font-size: 3rem;
   font-weight: 800;
-  color: #1f2937; /* Cinza escuro */
+  color: #1f2937;
   margin: 0;
 }
 
 .subtitle {
-  font-size: 1.125rem; /* 18px */
-  color: #6b7280; /* Cinza médio */
+  font-size: 1.125rem;
+  color: #6b7280;
   margin-top: 8px;
   margin-bottom: 40px;
 }
@@ -134,18 +131,18 @@ export default {
 .button-group {
   display: flex;
   justify-content: center;
-  gap: 16px; /* Espaço entre os botões */
+  gap: 16px;
 }
 
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px; /* Espaço entre ícone e texto do botão */
+  gap: 8px;
   padding: 12px 28px;
   border: none;
   border-radius: 8px;
-  font-size: 1rem; /* 16px */
+  font-size: 1rem;
   font-weight: 600;
   color: #ffffff;
   cursor: pointer;
@@ -163,18 +160,18 @@ export default {
 }
 
 .btn-primary {
-  background-color: #3b82f6; /* Azul */
+  background-color: #3b82f6;
 }
 
 .btn-primary:hover {
-  background-color: #2563eb; /* Azul mais escuro */
+  background-color: #2563eb;
 }
 
 .btn-success {
-  background-color: #10b981; /* Verde/Esmeralda */
+  background-color: #10b981;
 }
 
 .btn-success:hover {
-  background-color: #059669; /* Verde mais escuro */
+  background-color: #059669;
 }
 </style>

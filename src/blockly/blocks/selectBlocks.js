@@ -1,9 +1,6 @@
 import * as Blockly from 'blockly/core';
 
-/**
- * Blocos relacionados à leitura e visualização de dados.
- * Escrito em português simples, com foco na clareza para estudantes PcD.
- */
+
 export function registerSelectBlocks() {
 
   // Bloco: Selecionar todos os registros de uma tabela
