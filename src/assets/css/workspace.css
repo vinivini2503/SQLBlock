@@ -1,0 +1,56 @@
+/* Estilos básicos do Blockly */
+.blocklySvg {
+  background-color: #fff;
+  border: 1px solid #ddd;
+}
+
+.blocklyMainBackground {
+  stroke-width: 1;
+  stroke: #e0e0e0;
+  fill: transparent;
+}
+
+.blocklyToolboxDiv {
+  background-color: #fff;
+  border-right: 1px solid #ddd;
+  overflow-x: visible;
+  overflow-y: auto;
+}
+
+.blocklyFlyout {
+  background-color: #fff;
+  border-right: 1px solid #ddd;
+}
+
+.blocklyBlockCanvas {
+  background-color: #fff;
+}
+
+.blocklyScrollbarHandle {
+  fill: #bbb;
+}
+
+.blocklyScrollbarBackground {
+  fill: #f0f0f0;
+}
+
+.blocklyDraggable {
+  cursor: move;
+}
+
+.blocklyDragging {
+  opacity: 0.8;
+}
+
+/* Estilos customizados para o workspace */
+.blockly-workspace {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+/* Ajustes para o placeholder */
+.workspace-placeholder {
+  user-select: none;
+}
+

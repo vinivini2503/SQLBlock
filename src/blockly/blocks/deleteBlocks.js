@@ -1,4 +1,5 @@
 import * as Blockly from 'blockly/core';
+import { sqlGenerator } from '../generators/sql';
 
 export function registerDeleteBlocks() {
 
@@ -18,10 +19,10 @@ export function registerDeleteBlocks() {
   };
 
   // Gerador SQL: deletar_registros
-  Blockly.JavaScript['deletar_registros'] = function (block) {
+  sqlGenerator['deletar_registros'] = function (block) {
     const tableName = block.getFieldValue('table_name');
-    const condition = Blockly.JavaScript.valueToCode(block, 'condicao', Blockly.JavaScript.ORDER_ATOMIC);
-    const code = `DELETE FROM ${tableName} WHERE ${condition};\n`;
+    const condition = sqlGenerator.valueToCode(block, 'condicao', sqlGenerator.ORDER_ATOMIC);
+    const code = `DELETE FROM ${tableName} WHERE ${condition[0]};\n`;
     return code;
   };
 
@@ -38,7 +39,7 @@ export function registerDeleteBlocks() {
   };
 
   // Gerador SQL: deletar_todos
-  Blockly.JavaScript['deletar_todos'] = function (block) {
+  sqlGenerator['deletar_todos'] = function (block) {
     const tableName = block.getFieldValue('table_name');
     const code = `DELETE FROM ${tableName};\n`;
     return code;
@@ -57,7 +58,7 @@ export function registerDeleteBlocks() {
   };
 
   // Gerador SQL: deletar_tabela
-  Blockly.JavaScript['deletar_tabela'] = function (block) {
+  sqlGenerator['deletar_tabela'] = function (block) {
     const tableName = block.getFieldValue('table_name');
     const code = `DROP TABLE ${tableName};\n`;
     return code;
@@ -84,11 +85,11 @@ export function registerDeleteBlocks() {
   };
 
   // Gerador SQL: condicao_simples_delete
-  Blockly.JavaScript['condicao_simples_delete'] = function (block) {
+  sqlGenerator['condicao_simples_delete'] = function (block) {
     const column = block.getFieldValue('column');
     const operator = block.getFieldValue('operator');
     const value = block.getFieldValue('value');
     const code = `${column} ${operator} ${value}`;
-    return [code, Blockly.JavaScript.ORDER_ATOMIC];
+    return [code, sqlGenerator.ORDER_ATOMIC];
   };
 }

@@ -1,4 +1,5 @@
 import * as Blockly from 'blockly/core';
+import { sqlGenerator } from '../generators/sql';
 
 export function registerInsertBlocks() {
 
@@ -18,11 +19,14 @@ export function registerInsertBlocks() {
   };
 
   //  Gerador SQL do bloco "inserir_dados"
-  Blockly.JavaScript['inserir_dados'] = function (block) {
+  sqlGenerator['inserir_dados'] = function (block) {
     const tableName = block.getFieldValue('table_name');
-    const values = Blockly.JavaScript.statementToCode(block, 'valores');
-    const rows = values.trim().split('\n').filter(v => v !== '');
-    const code = `INSERT INTO ${tableName} VALUES \n${rows.join(',\n')};\n`;
+    const values = sqlGenerator.statementToCode(block, 'valores');
+    const rows = values.trim().split('\n').filter(v => v.trim() !== '' && v.trim() !== ';');
+    if (rows.length === 0) {
+      return `INSERT INTO ${tableName} VALUES ();\n`;
+    }
+    const code = `INSERT INTO ${tableName} VALUES\n${rows.join(',\n')};\n`;
     return code;
   };
 
@@ -41,7 +45,7 @@ export function registerInsertBlocks() {
   };
 
   // Gerador SQL do bloco "valor_inserir"
-  Blockly.JavaScript['valor_inserir'] = function (block) {
+  sqlGenerator['valor_inserir'] = function (block) {
     const values = block.getFieldValue('values');
     return `(${values})\n`;
   };

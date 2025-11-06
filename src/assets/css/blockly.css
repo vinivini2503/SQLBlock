@@ -1,0 +1,234 @@
+/* Blockly CSS - Estilos básicos necessários */
+
+/* Container principal do Blockly */
+.blocklySvg {
+  background-color: #fff;
+  border: 1px solid #ddd;
+  overflow: visible;
+}
+
+/* Fundo principal do workspace */
+.blocklyMainBackground {
+  stroke-width: 1;
+  stroke: #e0e0e0;
+  fill: transparent;
+}
+
+/* Toolbox lateral */
+.blocklyToolboxDiv {
+  background-color: #fff !important;
+  border-right: 1px solid #ddd !important;
+  overflow-x: visible !important;
+  overflow-y: auto !important;
+  position: absolute !important;
+  left: 0 !important;
+  top: 0 !important;
+  height: 100% !important;
+  width: 200px !important;
+  z-index: 10 !important;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* Categorias do toolbox */
+.blocklyTreeRow {
+  padding: 8px 12px;
+  margin: 2px 0;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.blocklyTreeRow:hover {
+  background-color: #f0f0f0;
+}
+
+.blocklyTreeRow.blocklyTreeSelected {
+  background-color: #e8f0fe;
+}
+
+.blocklyTreeIcon {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+.blocklyTreeLabel {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 14px;
+  color: #333;
+}
+
+/* Flyout (menu lateral de blocos) */
+.blocklyFlyout {
+  background-color: #fff;
+  border-right: 1px solid #ddd;
+  overflow-y: auto;
+  overflow-x: visible;
+}
+
+/* Canvas dos blocos */
+.blocklyBlockCanvas {
+  background-color: #fff;
+}
+
+/* Blocos */
+.blocklyDraggable {
+  cursor: move;
+}
+
+.blocklyDragging {
+  opacity: 0.8;
+}
+
+/* Scrollbars */
+.blocklyScrollbarHandle {
+  fill: #bbb;
+  cursor: pointer;
+}
+
+.blocklyScrollbarHandle:hover {
+  fill: #999;
+}
+
+.blocklyScrollbarBackground {
+  fill: #f0f0f0;
+}
+
+/* Texto dos blocos */
+.blocklyText {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 14px;
+  fill: #333;
+}
+
+/* Inputs dos blocos */
+.blocklyEditableText {
+  cursor: text;
+}
+
+.blocklyEditableText:hover {
+  fill: #0066cc;
+}
+
+/* Conectores dos blocos */
+.blocklyPath {
+  fill: none;
+  stroke-width: 2;
+}
+
+.blocklyHighlightedConnectionPath {
+  stroke: #fc3;
+  stroke-width: 4;
+}
+
+/* Trash can (lixeira) */
+.blocklyTrash {
+  fill: #bbb;
+  cursor: pointer;
+}
+
+.blocklyTrash:hover {
+  fill: #999;
+}
+
+/* Zoom controls */
+.blocklyZoomControls {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.blocklyZoomControl {
+  width: 32px;
+  height: 32px;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: #333;
+}
+
+.blocklyZoomControl:hover {
+  background-color: #f0f0f0;
+}
+
+/* Grid do workspace */
+.blocklyGridPattern {
+  stroke: #e0e0e0;
+  stroke-width: 1;
+}
+
+/* Seleção de blocos */
+.blocklySelected > .blocklyPath {
+  stroke: #fc3;
+  stroke-width: 3;
+}
+
+/* Tooltips */
+.blocklyTooltipDiv {
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 8px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 12px;
+  color: #333;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  pointer-events: none;
+  z-index: 1000;
+}
+
+/* Mensagens de erro */
+.blocklyErrorIcon {
+  fill: #f00;
+}
+
+/* Dropdowns */
+.blocklyDropdownDiv {
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 14px;
+  z-index: 1000;
+}
+
+.blocklyDropdownContent {
+  padding: 4px 8px;
+  cursor: pointer;
+}
+
+.blocklyDropdownContent:hover {
+  background-color: #f0f0f0;
+}
+
+/* Campo de texto */
+.blocklyTextInput {
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  padding: 2px 4px;
+  border: 1px solid #ccc;
+  border-radius: 2px;
+}
+
+/* Campo numérico */
+.blocklyNumberInput {
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  padding: 2px 4px;
+  border: 1px solid #ccc;
+  border-radius: 2px;
+}
+

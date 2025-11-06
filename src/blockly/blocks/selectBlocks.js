@@ -1,5 +1,5 @@
 import * as Blockly from 'blockly/core';
-
+import { sqlGenerator } from '../generators/sql';
 
 export function registerSelectBlocks() {
 
@@ -16,7 +16,7 @@ export function registerSelectBlocks() {
   };
 
   // Gerador SQL: selecionar_tudo
-  Blockly.JavaScript['selecionar_tudo'] = function (block) {
+  sqlGenerator['selecionar_tudo'] = function (block) {
     const tableName = block.getFieldValue('table_name');
     const code = `SELECT * FROM ${tableName};\n`;
     return code;
@@ -37,7 +37,7 @@ export function registerSelectBlocks() {
   };
 
   // Gerador SQL: selecionar_colunas
-  Blockly.JavaScript['selecionar_colunas'] = function (block) {
+  sqlGenerator['selecionar_colunas'] = function (block) {
     const columns = block.getFieldValue('columns');
     const tableName = block.getFieldValue('table_name');
     const code = `SELECT ${columns} FROM ${tableName};\n`;
@@ -60,10 +60,10 @@ export function registerSelectBlocks() {
   };
 
   // Gerador SQL: selecionar_com_condicao
-  Blockly.JavaScript['selecionar_com_condicao'] = function (block) {
+  sqlGenerator['selecionar_com_condicao'] = function (block) {
     const tableName = block.getFieldValue('table_name');
-    const condition = Blockly.JavaScript.valueToCode(block, 'condicao', Blockly.JavaScript.ORDER_ATOMIC);
-    const code = `SELECT * FROM ${tableName} WHERE ${condition};\n`;
+    const condition = sqlGenerator.valueToCode(block, 'condicao', sqlGenerator.ORDER_ATOMIC);
+    const code = `SELECT * FROM ${tableName} WHERE ${condition[0]};\n`;
     return code;
   };
 
@@ -88,11 +88,11 @@ export function registerSelectBlocks() {
   };
 
   // Gerador SQL: condicao_simples
-  Blockly.JavaScript['condicao_simples'] = function (block) {
+  sqlGenerator['condicao_simples'] = function (block) {
     const column = block.getFieldValue('column');
     const operator = block.getFieldValue('operator');
     const value = block.getFieldValue('value');
     const code = `${column} ${operator} ${value}`;
-    return [code, Blockly.JavaScript.ORDER_ATOMIC];
+    return [code, sqlGenerator.ORDER_ATOMIC];
   };
 }

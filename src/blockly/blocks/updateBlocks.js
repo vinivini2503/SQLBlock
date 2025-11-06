@@ -1,5 +1,5 @@
 import * as Blockly from 'blockly/core';
-
+import { sqlGenerator } from '../generators/sql';
 
 export function registerUpdateBlocks() {
 
@@ -22,11 +22,13 @@ export function registerUpdateBlocks() {
   };
 
   // Gerador SQL: atualizar_dados
-  Blockly.JavaScript['atualizar_dados'] = function (block) {
+  sqlGenerator['atualizar_dados'] = function (block) {
     const tableName = block.getFieldValue('table_name');
-    const newValues = Blockly.JavaScript.statementToCode(block, 'novos_valores').trim();
-    const condition = Blockly.JavaScript.valueToCode(block, 'condicao', Blockly.JavaScript.ORDER_ATOMIC);
-    const code = `UPDATE ${tableName} SET ${newValues} WHERE ${condition};\n`;
+    let newValues = sqlGenerator.statementToCode(block, 'novos_valores').trim();
+    // Remove a vírgula extra no final
+    newValues = newValues.replace(/,\s*$/, '');
+    const condition = sqlGenerator.valueToCode(block, 'condicao', sqlGenerator.ORDER_ATOMIC);
+    const code = `UPDATE ${tableName} SET ${newValues} WHERE ${condition[0]};\n`;
     return code;
   };
 
@@ -46,7 +48,7 @@ export function registerUpdateBlocks() {
     }
   };
   // Gerador SQL: novo_valor
-  Blockly.JavaScript['novo_valor'] = function (block) {
+  sqlGenerator['novo_valor'] = function (block) {
     const column = block.getFieldValue('column');
     const value = block.getFieldValue('value');
     return `${column} = ${value},\n`;
@@ -73,11 +75,11 @@ export function registerUpdateBlocks() {
   };
 
   // Gerador SQL: condicao_simples_update
-  Blockly.JavaScript['condicao_simples_update'] = function (block) {
+  sqlGenerator['condicao_simples_update'] = function (block) {
     const column = block.getFieldValue('column');
     const operator = block.getFieldValue('operator');
     const value = block.getFieldValue('value');
     const code = `${column} ${operator} ${value}`;
-    return [code, Blockly.JavaScript.ORDER_ATOMIC];
+    return [code, sqlGenerator.ORDER_ATOMIC];
   };
 }
