@@ -66,13 +66,8 @@ import * as Blockly from 'blockly/core';
 import { SqlGenerator } from '@/blockly/generators/sql';
 import 'blockly/blocks';
 
-// Importar os blocos customizados
-import { registerCreateBlocks } from '@/blockly/blocks/createBlocks';
-import { registerSelectBlocks } from '@/blockly/blocks/selectBlocks';
-import { registerInsertBlocks } from '@/blockly/blocks/insertBlocks';
-import { registerUpdateBlocks } from '@/blockly/blocks/updateBlocks';
-import { registerDeleteBlocks } from '@/blockly/blocks/deleteBlocks';
-import { registerAdvancedSqlBlocks } from '@/blockly/blocks/advancedSqlBlocks';
+// Importar blocos SQL avançados (versão única usada pelo app)
+import { registerAdvancedSqlBlocks } from '@/blockly/blocks/sqlBlocks';
 
 // Importar CSS
 import '@/assets/css/workspace.css';
@@ -100,12 +95,7 @@ export default {
   },
   methods: {
     inicializarBlockly() {
-      // Registrar todos os blocos customizados
-      registerCreateBlocks();
-      registerSelectBlocks();
-      registerInsertBlocks();
-      registerUpdateBlocks();
-      registerDeleteBlocks();
+      // Registrar blocos SQL customizados (apenas versão avançada)
       registerAdvancedSqlBlocks();
 
       // Configuração do Blockly com toolbox padrão usando blocos SQL avançados
