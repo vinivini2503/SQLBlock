@@ -24,73 +24,14 @@
           <span class="icon">💾</span>
           <span>Salvar</span>
         </button>
-        <button class="btn-menu" @click="toggleMenu">
-          <span class="icon">☰</span>
-        </button>
       </div>
     </header>
 
     <div class="main-content">
-      <!-- Sidebar com categorias -->
-      <aside class="sidebar" :class="{ 'sidebar-hidden': !sidebarVisible }">
-        <div class="category-section">
-          <button class="category-header" @click="toggleCategory('modificar')">
-            <span class="icon">📊</span>
-            Modificar tabelas
-            <span class="arrow">{{ categoriaAberta.modificar ? '▼' : '▶' }}</span>
-          </button>
-          <div v-show="categoriaAberta.modificar" class="category-buttons">
-            <button class="btn-category blue" @click="adicionarBlocoToolbox('criar_tabela')">
-              CRIAR TABELA
-            </button>
-            <button class="btn-category blue" @click="adicionarBlocoToolbox('alterar_tabela')">
-              ALTERAR TABELA
-            </button>
-            <button class="btn-category blue" @click="adicionarBlocoToolbox('excluir_tabela')">
-              EXCLUIR TABELA
-            </button>
-            <button class="btn-category blue" @click="adicionarBlocoToolbox('atualizar')">
-              ATUALIZAR
-            </button>
-          </div>
-        </div>
-
-        <div class="category-section">
-          <button class="category-header" @click="toggleCategory('pesquisas')">
-            <span class="icon">🔍</span>
-            Fazer pesquisas
-            <span class="arrow">{{ categoriaAberta.pesquisas ? '▼' : '▶' }}</span>
-          </button>
-          <div v-show="categoriaAberta.pesquisas" class="category-buttons">
-            <button class="btn-category green" @click="adicionarBlocoToolbox('da_tabela')">
-              DA TABELA
-            </button>
-            <button class="btn-category green" @click="adicionarBlocoToolbox('alterar_tabela_select')">
-              ALTERAR TABELA
-            </button>
-            <button class="btn-category green" @click="adicionarBlocoToolbox('ordenar_por')">
-              ORDENAR POR
-            </button>
-          </div>
-        </div>
-
-        <div class="category-section">
-          <button class="btn-category red" @click="adicionarBlocoToolbox('unir_tabelas')">
-            Unir Tabelas
-          </button>
-          <button class="btn-category red-light" @click="adicionarBlocoToolbox('conectores')">
-            <span class="icon">∞</span>
-          </button>
-          <button class="btn-category red-dark" @click="adicionarBlocoToolbox('juntar_lado_direito')">
-            JUNTAR TABELA DO LADO DIREITO
-          </button>
-        </div>
-      </aside>
-
       <!-- Área do Blockly Workspace -->
       <div class="workspace-area">
         <div v-if="!workspaceIniciado" class="workspace-placeholder">
-          <p>Arraste os blocos da lateral para começar</p>
+          <p>Arraste os blocos da toolbox para começar</p>
         </div>
         <div ref="blocklyDiv" class="blockly-workspace"></div>
 
@@ -122,15 +63,16 @@
 
 <script>
 import * as Blockly from 'blockly/core';
-import { javascriptGenerator } from 'blockly/javascript';
+import { SqlGenerator } from '@/blockly/generators/sql';
 import 'blockly/blocks';
 
 // Importar os blocos customizados
-import { registerCreateBlocks } from '@/blocks/createBlocks';
-import { registerSelectBlocks } from '@/blocks/selectBlocks';
-import { registerInsertBlocks } from '@/blocks/insertBlocks';
-import { registerUpdateBlocks } from '@/blocks/updateBlocks';
-import { registerDeleteBlocks } from '@/blocks/deleteBlocks';
+import { registerCreateBlocks } from '@/blockly/blocks/createBlocks';
+import { registerSelectBlocks } from '@/blockly/blocks/selectBlocks';
+import { registerInsertBlocks } from '@/blockly/blocks/insertBlocks';
+import { registerUpdateBlocks } from '@/blockly/blocks/updateBlocks';
+import { registerDeleteBlocks } from '@/blockly/blocks/deleteBlocks';
+import { registerAdvancedSqlBlocks } from '@/blockly/blocks/advancedSqlBlocks';
 
 // Importar CSS
 import '@/assets/css/workspace.css';
@@ -144,14 +86,11 @@ export default {
       codigoSQL: '',
       mostrarSQL: false,
       modalExportar: false,
-      sidebarVisible: true,
-      categoriaAberta: {
-        modificar: true,
-        pesquisas: true
-      }
+      sqlGenerator: null
     };
   },
   mounted() {
+    this.sqlGenerator = new SqlGenerator();
     this.inicializarBlockly();
   },
   beforeUnmount() {
@@ -167,19 +106,45 @@ export default {
       registerInsertBlocks();
       registerUpdateBlocks();
       registerDeleteBlocks();
+      registerAdvancedSqlBlocks();
 
-      // Configuração do Blockly com toolbox padrão
+      // Configuração do Blockly com toolbox padrão usando blocos SQL avançados
       const toolbox = {
         kind: 'categoryToolbox',
         contents: [
           {
             kind: 'category',
-            name: 'Criar/Modificar',
+            name: 'Início',
+            colour: '#4CAF50',
+            contents: [
+              { kind: 'block', type: 'start_sql' }
+            ]
+          },
+          {
+            kind: 'category',
+            name: 'Tabelas (CREATE / ALTER / DROP)',
             colour: '#5C81A6',
             contents: [
-              { kind: 'block', type: 'criar_tabela' },
-              { kind: 'block', type: 'definir_coluna' },
-              { kind: 'block', type: 'deletar_tabela' }
+              { kind: 'block', type: 'create_table' },
+              { kind: 'block', type: 'table_var' },
+              { kind: 'block', type: 'table_var_pk' },
+              { kind: 'block', type: 'table_var_fk' },
+              { kind: 'block', type: 'alter_table' },
+              { kind: 'block', type: 'drop_table' }
+            ]
+          },
+          {
+            kind: 'category',
+            name: 'Dados (INSERT / UPDATE / DELETE)',
+            colour: '#A65C81',
+            contents: [
+              { kind: 'block', type: 'insert_table' },
+              { kind: 'block', type: 'insert_start' },
+              { kind: 'block', type: 'insert_var' },
+              { kind: 'block', type: 'insert_var_default' },
+              { kind: 'block', type: 'update_table' },
+              { kind: 'block', type: 'update_var' },
+              { kind: 'block', type: 'delete_from_table' }
             ]
           },
           {
@@ -187,39 +152,17 @@ export default {
             name: 'Consultas (SELECT)',
             colour: '#5CA65C',
             contents: [
-              { kind: 'block', type: 'selecionar_tudo' },
-              { kind: 'block', type: 'selecionar_colunas' },
-              { kind: 'block', type: 'selecionar_com_condicao' },
-              { kind: 'block', type: 'condicao_simples' }
-            ]
-          },
-          {
-            kind: 'category',
-            name: 'Inserir (INSERT)',
-            colour: '#A65C81',
-            contents: [
-              { kind: 'block', type: 'inserir_dados' },
-              { kind: 'block', type: 'valor_inserir' }
-            ]
-          },
-          {
-            kind: 'category',
-            name: 'Atualizar (UPDATE)',
-            colour: '#5C7DA6',
-            contents: [
-              { kind: 'block', type: 'atualizar_dados' },
-              { kind: 'block', type: 'novo_valor' },
-              { kind: 'block', type: 'condicao_simples_update' }
-            ]
-          },
-          {
-            kind: 'category',
-            name: 'Deletar (DELETE)',
-            colour: '#A65C5C',
-            contents: [
-              { kind: 'block', type: 'deletar_registros' },
-              { kind: 'block', type: 'deletar_todos' },
-              { kind: 'block', type: 'condicao_simples_delete' }
+              { kind: 'block', type: 'select' },
+              { kind: 'block', type: 'select2' },
+              { kind: 'block', type: 'select3' },
+              { kind: 'block', type: 'select4' },
+              { kind: 'block', type: 'select_var' },
+              { kind: 'block', type: 'select_from' },
+              { kind: 'block', type: 'select_join' },
+              { kind: 'block', type: 'select_join_op' },
+              { kind: 'block', type: 'select_where' },
+              { kind: 'block', type: 'select_where_op' },
+              { kind: 'block', type: 'select_orderby' }
             ]
           }
         ]
@@ -259,7 +202,7 @@ export default {
 
     gerarCodigoSQL() {
       try {
-        this.codigoSQL = javascriptGenerator.workspaceToCode(this.workspace);
+        this.codigoSQL = this.sqlGenerator.workspaceToCode(this.workspace);
       } catch (error) {
         console.error('Erro ao gerar SQL:', error);
         this.codigoSQL = '-- Erro ao gerar código SQL';
@@ -310,19 +253,6 @@ export default {
 
     voltar() {
       this.$router.push('/projetos');
-    },
-
-    toggleMenu() {
-      this.sidebarVisible = !this.sidebarVisible;
-    },
-
-    toggleCategory(category) {
-      this.categoriaAberta[category] = !this.categoriaAberta[category];
-    },
-
-    adicionarBlocoToolbox(tipo) {
-      // Esta função pode ser expandida para adicionar blocos programaticamente
-      console.log('Adicionar bloco:', tipo);
     }
   }
 };

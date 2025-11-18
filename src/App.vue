@@ -9,5 +9,5 @@ import BlocklyView from '@/views/BlocklyView.vue'
 </script>
 
 <style>
-@import '/src/assets/css/workspace.cssz'
+@import '/src/assets/css/workspace.css'
 </style>
