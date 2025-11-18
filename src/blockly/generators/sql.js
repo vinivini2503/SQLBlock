@@ -11,26 +11,48 @@ export class SqlGenerator extends Blockly.Generator {
   }
 
   /**
+   * Gera código para um bloco específico usando o mapa forBlock_.
+   * Se não existir gerador para o tipo do bloco, retorna string vazia
+   * em vez de lançar erro.
+   */
+  blockToCode(block) {
+    if (!block) {
+      return '';
+    }
+
+    const func = this.forBlock_ && this.forBlock_[block.type];
+    if (!func) {
+      // Sem gerador definido para este tipo de bloco
+      return '';
+    }
+
+    return func(block, this) || '';
+  }
+
+  /**
    * Gera código SQL a partir de um workspace
    */
   workspaceToCode(workspace) {
     if (!workspace) {
       return '';
     }
-    
+
     const code = [];
     const blocks = workspace.getTopBlocks(true);
-    
+
     for (let i = 0; i < blocks.length; i++) {
-      const block = blocks[i];
-      if (block.type !== 'variables_get') {
-        const blockCode = this.blockToCode(block);
-        if (blockCode) {
-          code.push(blockCode);
+      let block = blocks[i];
+      while (block) {
+        if (block.type !== 'variables_get') {
+          const blockCode = this.blockToCode(block);
+          if (blockCode) {
+            code.push(blockCode);
+          }
         }
+        block = block.getNextBlock();
       }
     }
-    
+
     return code.join('\n');
   }
 
@@ -42,10 +64,10 @@ export class SqlGenerator extends Blockly.Generator {
     if (!targetBlock) {
       return '';
     }
-    
+
     let code = '';
     let nextBlock = targetBlock;
-    
+
     while (nextBlock) {
       const blockCode = this.blockToCode(nextBlock);
       if (blockCode) {
@@ -53,7 +75,7 @@ export class SqlGenerator extends Blockly.Generator {
       }
       nextBlock = nextBlock.getNextBlock();
     }
-    
+
     return code;
   }
 
@@ -65,12 +87,237 @@ export class SqlGenerator extends Blockly.Generator {
     if (!targetBlock) {
       return ['', order];
     }
-    
+
     const code = this.blockToCode(targetBlock);
     return [code, order];
   }
 }
 
-// Criar instância do gerador
+// Criar instância padrão do gerador
 export const sqlGenerator = new SqlGenerator();
+
+/**
+ * Definições de geração de código para cada tipo de bloco.
+ * Registramos no prototype e também na instância padrão para garantir compatibilidade.
+ */
+SqlGenerator.prototype.forBlock_ = sqlGenerator.forBlock_ = {
+  start_sql(block, generator) {
+    const dbName = block.getFieldValue('db_name') || '';
+    // Apenas um comentário para indicar o banco alvo
+    return `-- Conectar ao banco de dados: ${dbName}\n`;
+  },
+
+  create_table(block, generator) {
+    const option = block.getFieldValue('option') || '';
+    const tableName = block.getFieldValue('table_name') || '';
+
+    const cols = [];
+    const fks = [];
+    const pks = [];
+
+    let colBlock = block.getInputTargetBlock('table_var');
+    while (colBlock) {
+      if (colBlock.type === 'table_var') {
+        const name = colBlock.getFieldValue('var_name') || '';
+        const type = colBlock.getFieldValue('type') || '';
+        const attr = colBlock.getFieldValue('opcao') || '';
+        cols.push(`  ${name} ${type}${attr}`.trim());
+      } else if (colBlock.type === 'table_var_pk') {
+        const name = colBlock.getFieldValue('var_name') || '';
+        if (name) pks.push(name);
+      } else if (colBlock.type === 'table_var_fk') {
+        const col = colBlock.getFieldValue('var_name') || '';
+        const refTable = colBlock.getFieldValue('table_name') || '';
+        const refCol = colBlock.getFieldValue('var_name_reference') || '';
+        if (col && refTable && refCol) {
+          fks.push(`  FOREIGN KEY (${col}) REFERENCES ${refTable}(${refCol})`);
+        }
+      }
+      colBlock = colBlock.getNextBlock();
+    }
+
+    if (pks.length) {
+      cols.push(`  PRIMARY KEY (${pks.join(', ')})`);
+    }
+    cols.push(...fks);
+
+    const body = cols.join(',\n');
+    const sql = `CREATE TABLE${option} ${tableName} (\n${body}\n);`;
+    return sql + '\n';
+  },
+
+  insert_table(block, generator) {
+    const tableName = block.getFieldValue('table_name') || '';
+    const vars = (block.getFieldValue('vars') || '').trim();
+
+    // Para simplificar, vamos tentar recuperar valores a partir da cadeia de insert_start/insert_var/insert_var_default
+    const values = [];
+    const startBlock = block.getInputTargetBlock('insert_var');
+
+    if (startBlock && startBlock.type === 'insert_start') {
+      let current = startBlock.getInputTargetBlock('insert_var');
+      while (current) {
+        if (current.type === 'insert_var') {
+          const v = current.getFieldValue('var_input') || '';
+          values.push(`'${v}'`);
+        } else if (current.type === 'insert_var_default') {
+          const v = current.getFieldValue('var_input') || '';
+          values.push(v || 'NULL');
+        }
+        current = current.getInputTargetBlock('insert_var');
+      }
+    }
+
+    const valuesSql = values.length ? values.join(', ') : '-- valores_não_definidos';
+    const colsSql = vars || '-- colunas_nao_definidas';
+    return `INSERT INTO ${tableName} (${colsSql})\nVALUES (${valuesSql});\n`;
+  },
+
+  update_table(block, generator) {
+    const tableName = block.getFieldValue('table_name') || '';
+
+    // SET: percorrer cadeia de update_var
+    const sets = [];
+    let setBlock = block.getInputTargetBlock('update_var');
+    while (setBlock) {
+      if (setBlock.type === 'update_var') {
+        const col = setBlock.getFieldValue('var_name') || '';
+        const val = setBlock.getFieldValue('value') || '';
+        if (col) sets.push(`${col} = '${val}'`);
+      }
+      setBlock = setBlock.getNextBlock();
+    }
+
+    const setSql = sets.length ? sets.join(', ') : '-- sem_colunas_para_atualizar';
+
+    // WHERE simples
+    const whereCol = block.getFieldValue('column_name') || '';
+    const whereOp = block.getFieldValue('type') || '=';
+    const whereVal = block.getFieldValue('value') || '';
+    const whereSql = whereCol ? ` WHERE ${whereCol} ${whereOp} '${whereVal}'` : '';
+
+    return `UPDATE ${tableName}\nSET ${setSql}${whereSql};\n`;
+  },
+
+  delete_from_table(block, generator) {
+    const tableName = block.getFieldValue('table_name') || '';
+    const col = block.getFieldValue('var_name') || '';
+    const op = block.getFieldValue('type') || '=';
+    const val = block.getFieldValue('value') || '';
+
+    const whereSql = col ? ` WHERE ${col} ${op} '${val}'` : '';
+    return `DELETE FROM ${tableName}${whereSql};\n`;
+  },
+
+  drop_table(block, generator) {
+    const option = block.getFieldValue('option') || '';
+    const name = block.getFieldValue('name_table') || '';
+    return `DROP TABLE${option} ${name};\n`;
+  },
+
+  select(block, generator) {
+    // Colunas
+    const distinct = block.getFieldValue('option') || '';
+    const [varsCode] = generator.valueToCode(block, 'vars', generator.ORDER_NONE);
+    const cols = varsCode || '*';
+
+    // FROM
+    const [fromCode] = generator.valueToCode(block, 'from', generator.ORDER_NONE);
+    const fromSql = fromCode ? `\nFROM ${fromCode.trim()}` : '';
+
+    // JOIN
+    const [joinCode] = generator.valueToCode(block, 'join', generator.ORDER_NONE);
+    const joinSql = joinCode ? `\n${joinCode.trim()}` : '';
+
+    // WHERE
+    const [whereCode] = generator.valueToCode(block, 'conditions', generator.ORDER_NONE);
+    const whereSql = whereCode ? `\nWHERE ${whereCode.trim()}` : '';
+
+    // ORDER BY
+    const [orderCode] = generator.valueToCode(block, 'orderby', generator.ORDER_NONE);
+    const orderSql = orderCode ? `\nORDER BY ${orderCode.trim()}` : '';
+
+    return `SELECT${distinct} ${cols}${fromSql}${joinSql}${whereSql}${orderSql};\n`;
+  },
+
+  // Blocos auxiliares de SELECT
+  select_var(block, generator) {
+    const name = block.getFieldValue('var_input') || '*';
+    const [rest] = generator.valueToCode(block, 'vars', generator.ORDER_NONE);
+    if (rest) {
+      return `${name}, ${rest}`;
+    }
+    return name;
+  },
+
+  select_from(block, generator) {
+    const table = block.getFieldValue('table_name') || '';
+    const [rest] = generator.valueToCode(block, 'from', generator.ORDER_NONE);
+    if (rest) {
+      return `${table}, ${rest}`;
+    }
+    return table;
+  },
+
+  select_join(block, generator) {
+    const table = block.getFieldValue('table_name') || '';
+    const col1 = block.getFieldValue('table_var') || '';
+    const col2 = block.getFieldValue('table_join_var') || '';
+    const [rest] = generator.valueToCode(block, 'join', generator.ORDER_NONE);
+    const base = `INNER JOIN ${table} ON ${col1} = ${col2}`;
+    if (rest) {
+      return `${base}\n${rest}`;
+    }
+    return base;
+  },
+
+  select_join_op(block, generator) {
+    const type = block.getFieldValue('join_type') || 'INNER JOIN';
+    const table = block.getFieldValue('table_name') || '';
+    const col1 = block.getFieldValue('table_var') || '';
+    const col2 = block.getFieldValue('table_join_var') || '';
+    const [rest] = generator.valueToCode(block, 'join', generator.ORDER_NONE);
+    const base = `${type} ${table} ON ${col1} = ${col2}`;
+    if (rest) {
+      return `${base}\n${rest}`;
+    }
+    return base;
+  },
+
+  select_where(block, generator) {
+    const col = block.getFieldValue('variavel') || '';
+    const op = block.getFieldValue('op') || '=';
+    const val = block.getFieldValue('value') || '';
+    const [rest] = generator.valueToCode(block, 'conditions', generator.ORDER_NONE);
+    const base = `${col} ${op} '${val}'`;
+    if (rest) {
+      return `${base} ${rest}`;
+    }
+    return base;
+  },
+
+  select_where_op(block, generator) {
+    const action = block.getFieldValue('action') || 'AND';
+    const col = block.getFieldValue('variavel') || '';
+    const op = block.getFieldValue('op') || '=';
+    const val = block.getFieldValue('value') || '';
+    const [rest] = generator.valueToCode(block, 'conditions', generator.ORDER_NONE);
+    const base = `${action} ${col} ${op} '${val}'`;
+    if (rest) {
+      return `${base} ${rest}`;
+    }
+    return base;
+  },
+
+  select_orderby(block, generator) {
+    const col = block.getFieldValue('variavel') || '';
+    const dir = block.getFieldValue('op') || '';
+    const [rest] = generator.valueToCode(block, 'orderby', generator.ORDER_NONE);
+    const base = `${col}${dir}`;
+    if (rest) {
+      return `${base}, ${rest}`;
+    }
+    return base;
+  }
+};
 

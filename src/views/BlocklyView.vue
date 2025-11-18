@@ -63,7 +63,7 @@
 
 <script>
 import * as Blockly from 'blockly/core';
-import { SqlGenerator } from '@/blockly/generators/sql';
+import { sqlGenerator } from '@/blockly/generators/sql';
 import 'blockly/blocks';
 
 // Importar blocos SQL avançados (versão única usada pelo app)
@@ -85,7 +85,7 @@ export default {
     };
   },
   mounted() {
-    this.sqlGenerator = new SqlGenerator();
+    this.sqlGenerator = sqlGenerator;
     this.inicializarBlockly();
   },
   beforeUnmount() {
@@ -112,7 +112,7 @@ export default {
           },
           {
             kind: 'category',
-            name: 'Tabelas (CREATE / ALTER / DROP)',
+            name: 'Tabelas (CRIAR / MUDAR / APAGAR)',
             colour: '#5C81A6',
             contents: [
               { kind: 'block', type: 'create_table' },
@@ -139,17 +139,12 @@ export default {
           },
           {
             kind: 'category',
-            name: 'Consultas (SELECT)',
+            name: 'Consultas (SELECT simples)',
             colour: '#5CA65C',
             contents: [
               { kind: 'block', type: 'select' },
-              { kind: 'block', type: 'select2' },
-              { kind: 'block', type: 'select3' },
-              { kind: 'block', type: 'select4' },
               { kind: 'block', type: 'select_var' },
               { kind: 'block', type: 'select_from' },
-              { kind: 'block', type: 'select_join' },
-              { kind: 'block', type: 'select_join_op' },
               { kind: 'block', type: 'select_where' },
               { kind: 'block', type: 'select_where_op' },
               { kind: 'block', type: 'select_orderby' }
