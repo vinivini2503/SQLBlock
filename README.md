@@ -5,3 +5,5 @@
 3. Execute:
    ```bash
    npm install
+4. **rode um** `npm run dev`
+5. **experimente!**
