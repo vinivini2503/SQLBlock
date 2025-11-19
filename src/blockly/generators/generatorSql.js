@@ -40,8 +40,8 @@ export class SqlGenerator extends Blockly.Generator {
     const code = [];
     const blocks = workspace.getTopBlocks(true);
 
-    for (let i = 0; i < blocks.length; i++) {
-      let block = blocks[i];
+    for (const topBlock of blocks) {
+      let block = topBlock;
       while (block) {
         if (block.type !== 'variables_get') {
           const blockCode = this.blockToCode(block);
@@ -103,8 +103,10 @@ export const sqlGenerator = new SqlGenerator();
 SqlGenerator.prototype.forBlock_ = sqlGenerator.forBlock_ = {
   start_sql(block, generator) {
     const dbName = block.getFieldValue('db_name') || '';
-    // Apenas um comentário para indicar o banco alvo
-    return `-- Conectar ao banco de dados: ${dbName}\n`;
+    if (!dbName) {
+      return '';
+    }
+    return `CREATE DATABASE IF NOT EXISTS ${dbName};\nUSE ${dbName};\n`;
   },
 
   create_table(block, generator) {
@@ -148,29 +150,45 @@ SqlGenerator.prototype.forBlock_ = sqlGenerator.forBlock_ = {
 
   insert_table(block, generator) {
     const tableName = block.getFieldValue('table_name') || '';
-    const vars = (block.getFieldValue('vars') || '').trim();
 
-    // Para simplificar, vamos tentar recuperar valores a partir da cadeia de insert_start/insert_var/insert_var_default
+    // Percorre a lista de pares coluna/valor
+    const columns = [];
     const values = [];
-    const startBlock = block.getInputTargetBlock('insert_var');
+    let pairBlock = block.getInputTargetBlock('pairs');
 
-    if (startBlock && startBlock.type === 'insert_start') {
-      let current = startBlock.getInputTargetBlock('insert_var');
-      while (current) {
-        if (current.type === 'insert_var') {
-          const v = current.getFieldValue('var_input') || '';
-          values.push(`'${v}'`);
-        } else if (current.type === 'insert_var_default') {
-          const v = current.getFieldValue('var_input') || '';
-          values.push(v || 'NULL');
+    while (pairBlock) {
+      if (pairBlock.type === 'insert_pair') {
+        const col = pairBlock.getFieldValue('column_name') || '';
+        const type = pairBlock.getFieldValue('value_type') || 'typed';
+        const text = pairBlock.getFieldValue('value_text') || '';
+
+        if (col) {
+          columns.push(col);
+
+          if (type === 'typed') {
+            values.push(`'${text}'`);
+          } else if (type === 'NULL') {
+            values.push('NULL');
+          } else if (type === 'CURRENT_TIMESTAMP') {
+            values.push('CURRENT_TIMESTAMP');
+          } else if (type === 'DEFAULT') {
+            values.push('DEFAULT');
+          }
         }
-        current = current.getInputTargetBlock('insert_var');
       }
+
+      pairBlock = pairBlock.getNextBlock();
     }
 
-    const valuesSql = values.length ? values.join(', ') : '-- valores_não_definidos';
-    const colsSql = vars || '-- colunas_nao_definidas';
-    return `INSERT INTO ${tableName} (${colsSql})\nVALUES (${valuesSql});\n`;
+    if (!tableName || !columns.length) {
+      // Gera comentário para ajudar o aluno a entender o que falta
+      return '-- Complete o bloco INSERT: informe o nome da tabela e pelo menos uma coluna/valor.\n';
+    }
+
+    const columnsSql = columns.join(', ');
+    const valuesSql = values.join(', ');
+
+    return `INSERT INTO ${tableName} (${columnsSql})\nVALUES (${valuesSql});\n`;
   },
 
   update_table(block, generator) {

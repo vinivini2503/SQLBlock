@@ -34,11 +34,11 @@ export function registerAdvancedSqlBlocks() {
   Blockly.Blocks['start_sql'] = {
     init: function () {
       this.appendDummyInput()
-        .appendField('Conectar ao banco de dados')
+        .appendField('Criar banco de dados')
         .appendField(new Blockly.FieldTextInput('nome_do_banco'), 'db_name');
       this.setNextStatement(true, 'create_table');
       this.setColour(120);
-      this.setTooltip('Iniciando projeto SQL');
+      this.setTooltip('Cria o banco de dados e seleciona para usar');
       this.setHelpUrl('https://www.w3schools.com/sql/default.asp');
     }
   };
@@ -262,118 +262,53 @@ export function registerAdvancedSqlBlocks() {
     }
   }
 
-  // =========================
   // Blocos de INSERT
-  // =========================
 
+  // Bloco principal: representa o comando INSERT inteiro
   Blockly.Blocks['insert_table'] = {
     init: function () {
       this.appendDummyInput()
-        .appendField('Adicionar novas linhas na tabela')
-        .appendField(new Blockly.FieldTextInput('nome_tabela'), 'table_name')
-        .appendField('com colunas')
-        .appendField(new Blockly.FieldTextInput('coluna1, coluna2'), 'vars');
-      this.appendStatementInput('insert_var')
-        .appendField('Valores para inserir')
-        .setCheck('insert_start');
-      this.appendDummyInput()
-        .appendField('Valor digitado')
-        .appendField(
-          new Blockly.FieldImage(
-            'https://secure.webtoolhub.com/static/resources/icons/set72/c7033168.png',
-            15,
-            15,
-            '',
-            InsertVar
-          )
-        )
-        .appendField('Valor automático')
-        .appendField(
-          new Blockly.FieldImage(
-            'https://secure.webtoolhub.com/static/resources/icons/set72/c7033168.png',
-            15,
-            15,
-            '',
-            InsertVarDefault
-          )
-        );
+        .appendField('Adicionar nova linha na tabela')
+        .appendField(new Blockly.FieldTextInput('nome_tabela', validator), 'table_name');
+      this.appendStatementInput('pairs')
+        .appendField('Colunas e valores para a nova linha:')
+        .setCheck('insert_pair');
       this.setPreviousStatement(true, commonStatements);
       this.setNextStatement(true, commonStatements);
       this.setInputsInline(false);
       this.setColour(270);
-      this.setTooltip('');
+      this.setTooltip('Monta um comando INSERT, adicionando colunas e valores para uma nova linha.');
       this.setHelpUrl('');
     }
   };
 
-  Blockly.Blocks['insert_start'] = {
+  // Cada bloco representa um par coluna/valor do INSERT
+  Blockly.Blocks['insert_pair'] = {
     init: function () {
-      this.appendValueInput('insert_var').setCheck(['insert_var', 'insert_var_default']);
-      this.setPreviousStatement(['insert_table'], null);
-      this.setColour(270);
-      this.setTooltip('');
-      this.setHelpUrl('');
-      this.setDeletable(false);
-      this.setMovable(false);
-      this.setEditable(false);
-    }
-  };
-
-  Blockly.Blocks['insert_var'] = {
-    init: function () {
-      this.appendValueInput('insert_var')
-        .setCheck(['insert_var', 'insert_var_default'])
-        .appendField(new Blockly.FieldTextInput('valor'), 'var_input');
-      this.setOutput(true, ['insert_var', 'insert_var_default']);
-      this.setColour(300);
-      this.setTooltip('');
-      this.setHelpUrl('');
-    }
-  };
-
-  Blockly.Blocks['insert_var_default'] = {
-    init: function () {
-      this.appendValueInput('insert_var')
-        .setCheck(['insert_var', 'insert_var_default'])
+      this.appendDummyInput()
+        .appendField('coluna')
+        .appendField(new Blockly.FieldTextInput('nome_coluna', validator), 'column_name')
+        .appendField('recebe')
         .appendField(
           new Blockly.FieldDropdown([
+            ['um valor digitado', 'typed'],
             ['sem valor (NULL)', 'NULL'],
-            ['data e hora de agora', 'CURRENT_TIMESTAMP']
+            ['data e hora de agora', 'CURRENT_TIMESTAMP'],
+            ['valor padrão do banco (DEFAULT)', 'DEFAULT']
           ]),
-          'var_input'
-        );
-      this.setOutput(true, ['insert_var', 'insert_var_default']);
+          'value_type'
+        )
+        .appendField(new Blockly.FieldTextInput('valor'), 'value_text');
+      this.setPreviousStatement(true, 'insert_pair');
+      this.setNextStatement(true, 'insert_pair');
       this.setColour(300);
-      this.setTooltip('');
+      this.setTooltip('Liga uma coluna a um valor para o comando INSERT.');
       this.setHelpUrl('');
     }
   };
 
-  function InsertVar() {
-    let bloco = Blockly.selected.getChildren(true)[0];
 
-    while (bloco.getChildren(true)[0]) {
-      bloco = bloco.getChildren(true)[0];
-    }
-
-    bloco = bloco.getInput('insert_var').connection;
-    bloco.connect(newBlock('insert_var'));
-  }
-
-  function InsertVarDefault() {
-    let bloco = Blockly.selected.getChildren(true)[0];
-
-    while (bloco.getChildren(true)[0]) {
-      bloco = bloco.getChildren(true)[0];
-    }
-
-    bloco = bloco.getInput('insert_var').connection;
-    bloco.connect(newBlock('insert_var_default'));
-  }
-
-  // =========================
   // Blocos de UPDATE / ALTER / DELETE / DROP
-  // =========================
 
   Blockly.Blocks['update_table'] = {
     init: function () {
@@ -475,7 +410,7 @@ export function registerAdvancedSqlBlocks() {
   Blockly.Blocks['delete_from_table'] = {
     init: function () {
       this.appendDummyInput()
-        .appendField('Apagar algumas linhas da tabela')
+        .appendField('Apagar alguma linhada tabela')
         .appendField(new Blockly.FieldTextInput('nome_tabela'), 'table_name')
         .appendField('onde a coluna')
         .appendField(new Blockly.FieldTextInput('nome_coluna'), 'var_name');
@@ -524,9 +459,7 @@ export function registerAdvancedSqlBlocks() {
     }
   };
 
-  // =========================
   // Blocos de SELECT
-  // =========================
 
   Blockly.Blocks['select'] = {
     init: function () {

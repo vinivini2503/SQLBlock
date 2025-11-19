@@ -63,7 +63,7 @@
 
 <script>
 import * as Blockly from 'blockly/core';
-import { sqlGenerator } from '@/blockly/generators/sql';
+import { sqlGenerator } from '@/blockly/generators/generatorSql';
 import 'blockly/blocks';
 
 // Importar blocos SQL avançados (versão única usada pelo app)
@@ -128,10 +128,10 @@ export default {
             name: 'Dados (INSERT / UPDATE / DELETE)',
             colour: '#A65C81',
             contents: [
+              // INSERT
               { kind: 'block', type: 'insert_table' },
-              { kind: 'block', type: 'insert_start' },
-              { kind: 'block', type: 'insert_var' },
-              { kind: 'block', type: 'insert_var_default' },
+              { kind: 'block', type: 'insert_pair' },
+              // UPDATE / DELETE
               { kind: 'block', type: 'update_table' },
               { kind: 'block', type: 'update_var' },
               { kind: 'block', type: 'delete_from_table' }
