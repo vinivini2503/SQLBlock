@@ -33,7 +33,7 @@
  import playIcon from '../assets/images/play.png'
 
  export default {
-   name: 'Home',
+   name: 'HomePage',
    data () {
      return {
        logo,
