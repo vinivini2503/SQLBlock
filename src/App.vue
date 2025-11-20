@@ -1,13 +1,10 @@
 <template>
-  <main>
-    <BlocklyView />
-  </main>
+  <router-view />
 </template>
 
 <script setup>
-import BlocklyView from '@/views/BlocklyView.vue'
 </script>
 
 <style>
-@import '/src/assets/css/workspace.css'
+@import '/src/assets/css/workspace.css';
 </style>

@@ -243,10 +243,6 @@ SqlGenerator.prototype.forBlock_ = sqlGenerator.forBlock_ = {
     const [fromCode] = generator.valueToCode(block, 'from', generator.ORDER_NONE);
     const fromSql = fromCode ? `\nFROM ${fromCode.trim()}` : '';
 
-    // JOIN
-    const [joinCode] = generator.valueToCode(block, 'join', generator.ORDER_NONE);
-    const joinSql = joinCode ? `\n${joinCode.trim()}` : '';
-
     // WHERE
     const [whereCode] = generator.valueToCode(block, 'conditions', generator.ORDER_NONE);
     const whereSql = whereCode ? `\nWHERE ${whereCode.trim()}` : '';
@@ -255,7 +251,54 @@ SqlGenerator.prototype.forBlock_ = sqlGenerator.forBlock_ = {
     const [orderCode] = generator.valueToCode(block, 'orderby', generator.ORDER_NONE);
     const orderSql = orderCode ? `\nORDER BY ${orderCode.trim()}` : '';
 
-    return `SELECT${distinct} ${cols}${fromSql}${joinSql}${whereSql}${orderSql};\n`;
+    return `SELECT${distinct} ${cols}${fromSql}${whereSql}${orderSql};\n`;
+  },
+
+  // Bloco SELECT simplificado: colunas + FROM
+  select2(block, generator) {
+    const distinct = block.getFieldValue('option') || '';
+    const [varsCode] = generator.valueToCode(block, 'vars', generator.ORDER_NONE);
+    const cols = varsCode || '*';
+
+    const [fromCode] = generator.valueToCode(block, 'from', generator.ORDER_NONE);
+    const fromSql = fromCode ? `\nFROM ${fromCode.trim()}` : '';
+
+    return `SELECT${distinct} ${cols}${fromSql};\n`;
+  },
+
+  // Variações adicionais do bloco principal de SELECT (mesma lógica de 'select')
+  select3(block, generator) {
+    const distinct = block.getFieldValue('option') || '';
+    const [varsCode] = generator.valueToCode(block, 'vars', generator.ORDER_NONE);
+    const cols = varsCode || '*';
+
+    const [fromCode] = generator.valueToCode(block, 'from', generator.ORDER_NONE);
+    const fromSql = fromCode ? `\nFROM ${fromCode.trim()}` : '';
+
+    const [whereCode] = generator.valueToCode(block, 'conditions', generator.ORDER_NONE);
+    const whereSql = whereCode ? `\nWHERE ${whereCode.trim()}` : '';
+
+    const [orderCode] = generator.valueToCode(block, 'orderby', generator.ORDER_NONE);
+    const orderSql = orderCode ? `\nORDER BY ${orderCode.trim()}` : '';
+
+    return `SELECT${distinct} ${cols}${fromSql}${whereSql}${orderSql};\n`;
+  },
+
+  select4(block, generator) {
+    const distinct = block.getFieldValue('option') || '';
+    const [varsCode] = generator.valueToCode(block, 'vars', generator.ORDER_NONE);
+    const cols = varsCode || '*';
+
+    const [fromCode] = generator.valueToCode(block, 'from', generator.ORDER_NONE);
+    const fromSql = fromCode ? `\nFROM ${fromCode.trim()}` : '';
+
+    const [whereCode] = generator.valueToCode(block, 'conditions', generator.ORDER_NONE);
+    const whereSql = whereCode ? `\nWHERE ${whereCode.trim()}` : '';
+
+    const [orderCode] = generator.valueToCode(block, 'orderby', generator.ORDER_NONE);
+    const orderSql = orderCode ? `\nORDER BY ${orderCode.trim()}` : '';
+
+    return `SELECT${distinct} ${cols}${fromSql}${whereSql}${orderSql};\n`;
   },
 
   // Blocos auxiliares de SELECT
@@ -275,31 +318,6 @@ SqlGenerator.prototype.forBlock_ = sqlGenerator.forBlock_ = {
       return `${table}, ${rest}`;
     }
     return table;
-  },
-
-  select_join(block, generator) {
-    const table = block.getFieldValue('table_name') || '';
-    const col1 = block.getFieldValue('table_var') || '';
-    const col2 = block.getFieldValue('table_join_var') || '';
-    const [rest] = generator.valueToCode(block, 'join', generator.ORDER_NONE);
-    const base = `INNER JOIN ${table} ON ${col1} = ${col2}`;
-    if (rest) {
-      return `${base}\n${rest}`;
-    }
-    return base;
-  },
-
-  select_join_op(block, generator) {
-    const type = block.getFieldValue('join_type') || 'INNER JOIN';
-    const table = block.getFieldValue('table_name') || '';
-    const col1 = block.getFieldValue('table_var') || '';
-    const col2 = block.getFieldValue('table_join_var') || '';
-    const [rest] = generator.valueToCode(block, 'join', generator.ORDER_NONE);
-    const base = `${type} ${table} ON ${col1} = ${col2}`;
-    if (rest) {
-      return `${base}\n${rest}`;
-    }
-    return base;
   },
 
   select_where(block, generator) {

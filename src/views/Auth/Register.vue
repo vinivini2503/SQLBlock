@@ -1,13 +1,13 @@
 <template>
   <div class="auth-page">
-    <h1>Login</h1>
-    <p>Página de login criada uhul</p>
+    <h1>Cadastro</h1>
+    <p>Página de cadastro criada uhul.</p>
   </div>
 </template>
 
 <script>
  export default {
-   name: 'Login'
+   name: 'RegisterPage'
  }
 </script>
 

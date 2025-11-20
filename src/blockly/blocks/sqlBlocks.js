@@ -22,8 +22,21 @@ export function registerAdvancedSqlBlocks() {
     return newValue.replace(/\s/g, '_');
   };
 
+  function isBlockInFlyout(block) {
+    return !block || !block.workspace || block.workspace.isFlyout === true;
+  }
+
   function newBlock(tipo) {
-    const newblock = Blockly.getMainWorkspace().newBlock(tipo);
+    // Usar o mesmo workspace do bloco selecionado, quando não estiver no flyout.
+    let workspace = Blockly.selected && !isBlockInFlyout(Blockly.selected)
+      ? Blockly.selected.workspace
+      : Blockly.getMainWorkspace();
+
+    if (!workspace) {
+      return null;
+    }
+
+    const newblock = workspace.newBlock(tipo);
     newblock.initSvg();
     newblock.render();
 
@@ -34,11 +47,11 @@ export function registerAdvancedSqlBlocks() {
   Blockly.Blocks['start_sql'] = {
     init: function () {
       this.appendDummyInput()
-        .appendField('Criar banco de dados')
+        .appendField('Criar um novo banco de dados chamado')
         .appendField(new Blockly.FieldTextInput('nome_do_banco'), 'db_name');
       this.setNextStatement(true, 'create_table');
       this.setColour(120);
-      this.setTooltip('Cria o banco de dados e seleciona para usar');
+      this.setTooltip('Cria um banco de dados novo e começa a usar esse banco.');
       this.setHelpUrl('https://www.w3schools.com/sql/default.asp');
     }
   };
@@ -46,14 +59,15 @@ export function registerAdvancedSqlBlocks() {
   Blockly.Blocks['create_table'] = {
     init: function () {
       this.appendDummyInput()
-        .appendField('Criar tabela')
+        .appendField('Criar tabela nova')
         .appendField(
           new Blockly.FieldDropdown([
-            ['sem verificar', ''],
-            ['se ainda não existir', ' IF NOT EXISTS']
+            ['sempre criar', ''],
+            ['criar só se não existir ainda', ' IF NOT EXISTS']
           ]),
           'option'
         )
+        .appendField('com o nome')
         .appendField(new Blockly.FieldTextInput('nome_tabela', validator), 'table_name');
       this.appendStatementInput('table_var').setCheck('table_var');
       this.appendDummyInput()
@@ -185,6 +199,10 @@ export function registerAdvancedSqlBlocks() {
   };
 
   function addVar() {
+    if (!Blockly.selected || isBlockInFlyout(Blockly.selected)) {
+      return;
+    }
+
     const tipo = Blockly.selected.getFirstStatementConnection().check_;
     let bloco;
 
@@ -200,11 +218,17 @@ export function registerAdvancedSqlBlocks() {
     } else {
       bloco = Blockly.selected.getInput(tipo[0]).connection;
     }
+    const connection = newBlock(tipo[0]);
+    if (!connection) return;
 
-    bloco.connect(newBlock(tipo[0]));
+    bloco.connect(connection);
   }
 
   function addPK() {
+    if (!Blockly.selected || isBlockInFlyout(Blockly.selected)) {
+      return;
+    }
+
     if (
       Blockly.selected.getChildren(true).length === 0 ||
       Blockly.selected.getChildren(true)[0].type !== 'table_var'
@@ -213,10 +237,17 @@ export function registerAdvancedSqlBlocks() {
     }
 
     const block = Blockly.selected.getChildren(true)[0].lastConnectionInStack();
-    block.connect(newBlock('table_var_pk'));
+    const connection = newBlock('table_var_pk');
+    if (!connection) return;
+
+    block.connect(connection);
   }
 
   function addFk() {
+    if (!Blockly.selected || isBlockInFlyout(Blockly.selected)) {
+      return;
+    }
+
     if (
       Blockly.selected.getChildren(true).length === 0 ||
       Blockly.selected.getChildren(true)[0].type !== 'table_var'
@@ -229,11 +260,17 @@ export function registerAdvancedSqlBlocks() {
     while (bloco.sourceBlock_.type === 'table_var_pk') {
       bloco = bloco.sourceBlock_.getPreviousBlock().nextConnection;
     }
+    const connection = newBlock('table_var_fk');
+    if (!connection) return;
 
-    bloco.connect(newBlock('table_var_fk'));
+    bloco.connect(connection);
   }
 
   function up() {
+    if (!Blockly.selected || isBlockInFlyout(Blockly.selected)) {
+      return;
+    }
+
     if (Blockly.selected !== Blockly.selected.getTopStackBlock()) {
       let parent;
       if (Blockly.selected.getTopStackBlock().getNextBlock() === Blockly.selected) {
@@ -250,6 +287,10 @@ export function registerAdvancedSqlBlocks() {
   }
 
   function down() {
+    if (!Blockly.selected || isBlockInFlyout(Blockly.selected)) {
+      return;
+    }
+
     const bloco = Blockly.selected;
     if (
       bloco.getNextBlock() &&
@@ -268,10 +309,10 @@ export function registerAdvancedSqlBlocks() {
   Blockly.Blocks['insert_table'] = {
     init: function () {
       this.appendDummyInput()
-        .appendField('Adicionar nova linha na tabela')
+        .appendField('Colocar um novo registro na tabela')
         .appendField(new Blockly.FieldTextInput('nome_tabela', validator), 'table_name');
       this.appendStatementInput('pairs')
-        .appendField('Colunas e valores para a nova linha:')
+        .appendField('Colunas e valores desta nova linha:')
         .setCheck('insert_pair');
       this.setPreviousStatement(true, commonStatements);
       this.setNextStatement(true, commonStatements);
@@ -286,13 +327,13 @@ export function registerAdvancedSqlBlocks() {
   Blockly.Blocks['insert_pair'] = {
     init: function () {
       this.appendDummyInput()
-        .appendField('coluna')
+        .appendField('Na coluna')
         .appendField(new Blockly.FieldTextInput('nome_coluna', validator), 'column_name')
-        .appendField('recebe')
+        .appendField('colocar')
         .appendField(
           new Blockly.FieldDropdown([
-            ['um valor digitado', 'typed'],
-            ['sem valor (NULL)', 'NULL'],
+            ['um valor que eu digito', 'typed'],
+            ['nenhum valor (NULL)', 'NULL'],
             ['data e hora de agora', 'CURRENT_TIMESTAMP'],
             ['valor padrão do banco (DEFAULT)', 'DEFAULT']
           ]),
@@ -313,11 +354,11 @@ export function registerAdvancedSqlBlocks() {
   Blockly.Blocks['update_table'] = {
     init: function () {
       this.appendDummyInput()
-        .appendField('Atualizar dados da tabela')
+        .appendField('Mudar dados na tabela')
         .appendField(new Blockly.FieldTextInput('nome_tabela', validator), 'table_name');
       this.appendStatementInput('update_var').setCheck('update_var');
       this.appendDummyInput()
-        .appendField('Somente onde a coluna')
+        .appendField('Só nas linhas onde a coluna')
         .appendField(new Blockly.FieldTextInput('nome_coluna'), 'column_name')
         .appendField(
           new Blockly.FieldDropdown([
@@ -357,10 +398,10 @@ export function registerAdvancedSqlBlocks() {
   Blockly.Blocks['update_var'] = {
     init: function () {
       this.appendDummyInput()
-        .appendField('Coluna')
+        .appendField('Coluna que vai mudar')
         .appendField(new Blockly.FieldTextInput('nome_coluna', validator), 'var_name');
       this.appendDummyInput()
-        .appendField('Novo valor para esta coluna')
+        .appendField('Novo valor dessa coluna')
         .appendField(new Blockly.FieldTextInput('novo_valor'), 'value');
       this.setInputsInline(true);
       this.setPreviousStatement(true, 'update_var');
@@ -410,9 +451,9 @@ export function registerAdvancedSqlBlocks() {
   Blockly.Blocks['delete_from_table'] = {
     init: function () {
       this.appendDummyInput()
-        .appendField('Apagar alguma linhada tabela')
+        .appendField('Apagar linha da tabela')
         .appendField(new Blockly.FieldTextInput('nome_tabela'), 'table_name')
-        .appendField('onde a coluna')
+        .appendField('quando a coluna')
         .appendField(new Blockly.FieldTextInput('nome_coluna'), 'var_name');
       this.appendDummyInput()
         .appendField(
@@ -442,11 +483,11 @@ export function registerAdvancedSqlBlocks() {
   Blockly.Blocks['drop_table'] = {
     init: function () {
       this.appendDummyInput()
-        .appendField('Apagar a tabela inteira')
+        .appendField('Apagar a tabela inteira (com todos os dados)')
         .appendField(
           new Blockly.FieldDropdown([
-            ['sem verificar', ''],
-            ['se a tabela existir', ' IF EXISTS']
+            ['apagar direto', ''],
+            ['apenas se a tabela existir', ' IF EXISTS']
           ]),
           'option'
         )
@@ -461,53 +502,40 @@ export function registerAdvancedSqlBlocks() {
 
   // Blocos de SELECT
 
+  // Bloco principal de consulta, em linguagem mais didática
   Blockly.Blocks['select'] = {
     init: function () {
       this.appendValueInput('vars')
         .setCheck('select_var')
         .setAlign(Blockly.ALIGN_RIGHT)
-        .appendField('Mostrar colunas')
+        .appendField('Quais colunas você quer ver?')
         .appendField(
           new Blockly.FieldDropdown([
-            ['com repetidos', ''],
-            ['sem repetir linhas', ' DISTINCT']
+            ['aceitar linhas repetidas', ''],
+            ['sem repetir linhas (DISTINCT)', ' DISTINCT']
           ]),
           'option'
         );
       this.appendValueInput('from')
         .setCheck('select_from')
         .setAlign(Blockly.ALIGN_RIGHT)
-        .appendField('da tabela');
-      this.appendValueInput('join')
-        .setCheck('select_join')
-        .setAlign(Blockly.ALIGN_RIGHT)
-        .appendField(
-          new Blockly.FieldDropdown([
-            ['juntar onde combina', 'INNER JOIN'],
-            ['juntar deixando vazios à direita', 'LEFT JOIN'],
-            ['juntar deixando vazios à esquerda', 'RIGHT JOIN'],
-            ['juntar tudo das duas tabelas', 'FULL JOIN']
-          ]),
-          'join_type'
-        );
+        .appendField('De qual tabela?');
       this.appendValueInput('conditions')
         .setCheck('select_where')
         .setAlign(Blockly.ALIGN_RIGHT)
-        .appendField('somente onde');
+        .appendField('Filtrar resultados: só onde');
       this.appendValueInput('orderby')
         .setCheck('select_orderby')
         .setAlign(Blockly.ALIGN_RIGHT)
-        .appendField('organizar por');
+        .appendField('Organizar o resultado (ORDER BY)');
       this.appendDummyInput()
         .setAlign(Blockly.ALIGN_CENTRE)
-        .appendField('Adicionar mais partes')
+        .appendField('Adicionar mais partes na consulta')
         .appendField(
           new Blockly.FieldDropdown([
-            ['Coluna', 'Select'],
-            ['Tabela', 'From'],
-            ['Interação', 'Join'],
-            ['Restrição', 'Where'],
-            ['Ordenação', 'OrderBy']
+            ['Mais colunas para mostrar', 'Select'],
+            ['Mais condições (WHERE)', 'Where'],
+            ['Mais ordenações (ORDER BY)', 'OrderBy']
           ]),
           'opcao'
         )
@@ -533,25 +561,34 @@ export function registerAdvancedSqlBlocks() {
       this.appendValueInput('vars')
         .setCheck('select_var')
         .setAlign(Blockly.ALIGN_RIGHT)
-        .appendField('SELECT')
+        .appendField('Quais colunas você quer ver?')
         .appendField(
           new Blockly.FieldDropdown([
-            ['', ''],
-            ['DISTINCT', ' DISTINCT']
+            ['aceitar linhas repetidas', ''],
+            ['sem repetir linhas (DISTINCT)', ' DISTINCT']
           ]),
           'option'
         );
       this.appendValueInput('from')
         .setCheck('select_from')
         .setAlign(Blockly.ALIGN_RIGHT)
-        .appendField('FROM');
+        .appendField('De qual tabela?');
+      this.appendValueInput('conditions')
+        .setCheck('select_where')
+        .setAlign(Blockly.ALIGN_RIGHT)
+        .appendField('Filtrar resultados: só onde');
+      this.appendValueInput('orderby')
+        .setCheck('select_orderby')
+        .setAlign(Blockly.ALIGN_RIGHT)
+        .appendField('Organizar o resultado (ORDER BY)');
       this.appendDummyInput()
         .setAlign(Blockly.ALIGN_CENTRE)
-        .appendField('Adicionar')
+        .appendField('Adicionar mais partes na consulta')
         .appendField(
           new Blockly.FieldDropdown([
-            ['Coluna', 'Select'],
-            ['Tabela', 'From']
+            ['Mais colunas para mostrar', 'Select'],
+            ['Mais condições (WHERE)', 'Where'],
+            ['Mais ordenações (ORDER BY)', 'OrderBy']
           ]),
           'opcao'
         )
@@ -577,38 +614,34 @@ export function registerAdvancedSqlBlocks() {
       this.appendValueInput('vars')
         .setCheck('select_var')
         .setAlign(Blockly.ALIGN_RIGHT)
-        .appendField('SELECT')
+        .appendField('Quais colunas você quer ver?')
         .appendField(
           new Blockly.FieldDropdown([
-            ['', ''],
-            ['DISTINCT', ' DISTINCT']
+            ['aceitar linhas repetidas', ''],
+            ['sem repetir linhas (DISTINCT)', ' DISTINCT']
           ]),
           'option'
         );
       this.appendValueInput('from')
         .setCheck('select_from')
         .setAlign(Blockly.ALIGN_RIGHT)
-        .appendField('FROM');
-      this.appendValueInput('join')
-        .setCheck('select_join')
+        .appendField('De qual tabela?');
+      this.appendValueInput('conditions')
+        .setCheck('select_where')
         .setAlign(Blockly.ALIGN_RIGHT)
-        .appendField(
-          new Blockly.FieldDropdown([
-            ['INNER JOIN', 'INNER JOIN'],
-            ['LEFT JOIN', 'LEFT JOIN'],
-            ['RIGHT JOIN', 'RIGHT JOIN'],
-            ['FULL JOIN', 'FULL JOIN']
-          ]),
-          'join_type'
-        );
+        .appendField('Filtrar resultados: só onde');
+      this.appendValueInput('orderby')
+        .setCheck('select_orderby')
+        .setAlign(Blockly.ALIGN_RIGHT)
+        .appendField('Organizar o resultado (ORDER BY)');
       this.appendDummyInput()
         .setAlign(Blockly.ALIGN_CENTRE)
-        .appendField('Adicionar')
+        .appendField('Adicionar mais partes na consulta')
         .appendField(
           new Blockly.FieldDropdown([
-            ['Coluna', 'Select'],
-            ['Tabela', 'From'],
-            ['Interação', 'Join']
+            ['Mais colunas para mostrar', 'Select'],
+            ['Mais condições (WHERE)', 'Where'],
+            ['Mais ordenações (ORDER BY)', 'OrderBy']
           ]),
           'opcao'
         )
@@ -634,30 +667,34 @@ export function registerAdvancedSqlBlocks() {
       this.appendValueInput('vars')
         .setCheck('select_var')
         .setAlign(Blockly.ALIGN_RIGHT)
-        .appendField('SELECT')
+        .appendField('Quais colunas você quer ver?')
         .appendField(
           new Blockly.FieldDropdown([
-            ['', ''],
-            ['DISTINCT', ' DISTINCT']
+            ['aceitar linhas repetidas', ''],
+            ['sem repetir linhas (DISTINCT)', ' DISTINCT']
           ]),
           'option'
         );
       this.appendValueInput('from')
         .setCheck('select_from')
         .setAlign(Blockly.ALIGN_RIGHT)
-        .appendField('FROM');
+        .appendField('De qual tabela?');
       this.appendValueInput('conditions')
         .setCheck('select_where')
         .setAlign(Blockly.ALIGN_RIGHT)
-        .appendField('WHERE');
+        .appendField('Filtrar resultados: só onde');
+      this.appendValueInput('orderby')
+        .setCheck('select_orderby')
+        .setAlign(Blockly.ALIGN_RIGHT)
+        .appendField('Organizar o resultado (ORDER BY)');
       this.appendDummyInput()
         .setAlign(Blockly.ALIGN_CENTRE)
-        .appendField('Adicionar')
+        .appendField('Adicionar mais partes na consulta')
         .appendField(
           new Blockly.FieldDropdown([
-            ['Coluna', 'Select'],
-            ['Tabela', 'From'],
-            ['Restrição', 'Where']
+            ['Mais colunas para mostrar', 'Select'],
+            ['Mais condições (WHERE)', 'Where'],
+            ['Mais ordenações (ORDER BY)', 'OrderBy']
           ]),
           'opcao'
         )
@@ -705,42 +742,14 @@ export function registerAdvancedSqlBlocks() {
   Blockly.Blocks['select_join'] = {
     init: function () {
       this.appendValueInput('join')
-        .appendField(new Blockly.FieldTextInput('nome_tabela'), 'table_name')
-        .appendField('ligar quando')
-        .appendField(new Blockly.FieldLabelSerializable(''), 'tabela1')
-        .appendField('.')
-        .appendField(new Blockly.FieldTextInput('coluna1'), 'table_var')
+        .appendField('Juntar com a tabela')
+        .appendField(new Blockly.FieldTextInput('tabela_secundaria'), 'table_name')
+        .appendField('quando')
+        .appendField(new Blockly.FieldTextInput('tabela_principal.coluna'), 'table_var')
         .appendField('=')
-        .appendField(new Blockly.FieldLabelSerializable(''), 'tabela2')
-        .appendField('.')
-        .appendField(new Blockly.FieldTextInput('coluna2'), 'table_join_var')
+        .appendField(new Blockly.FieldTextInput('tabela_secundaria.coluna'), 'table_join_var')
         .setCheck('select_join_op');
       this.setOutput(true, 'select_join');
-      this.setColour(235);
-      this.setTooltip('');
-      this.setHelpUrl('');
-    }
-  };
-
-  Blockly.Blocks['select_join_op'] = {
-    init: function () {
-      this.appendValueInput('join')
-        .appendField(
-          new Blockly.FieldDropdown([
-            ['juntar onde combina', 'INNER JOIN'],
-            ['juntar deixando vazios à direita', 'LEFT JOIN'],
-            ['juntar deixando vazios à esquerda', 'RIGHT JOIN'],
-            ['juntar tudo das duas tabelas', 'FULL JOIN']
-          ]),
-          'join_type'
-        )
-        .appendField(new Blockly.FieldTextInput('nome_tabela'), 'table_name')
-        .appendField('ligar quando')
-        .appendField(new Blockly.FieldTextInput('coluna1'), 'table_var')
-        .appendField('=')
-        .appendField(new Blockly.FieldTextInput('coluna2'), 'table_join_var')
-        .setCheck('select_join_op');
-      this.setOutput(true, 'select_join_op');
       this.setColour(235);
       this.setTooltip('');
       this.setHelpUrl('');
@@ -750,23 +759,25 @@ export function registerAdvancedSqlBlocks() {
   Blockly.Blocks['select_where'] = {
     init: function () {
       this.appendValueInput('conditions')
+        .appendField('Coluna para comparar')
         .appendField(new Blockly.FieldTextInput('nome_coluna'), 'variavel')
         .appendField(
           new Blockly.FieldDropdown([
-            ['diferente de', '<>'],
-            ['igual a', '='],
-            ['maior que', '>'],
-            ['menor que', '<'],
-            ['maior ou igual a', '>='],
-            ['menor ou igual a', '<='],
-            ['parecida com (LIKE)', 'LIKE'],
-            ['é', 'IS'],
-            ['não é', 'IS NOT'],
-            ['entre dois valores', 'BETWEEN'],
-            ['em uma lista de valores', 'IN']
+            ['é diferente de', '<>'],
+            ['é igual a', '='],
+            ['é maior que', '>'],
+            ['é menor que', '<'],
+            ['é maior ou igual a', '>='],
+            ['é menor ou igual a', '<='],
+            ['parecida com o texto (LIKE)', 'LIKE'],
+            ['é (IS)', 'IS'],
+            ['não é (IS NOT)', 'IS NOT'],
+            ['entre dois valores (BETWEEN)', 'BETWEEN'],
+            ['em uma lista de valores (IN)', 'IN']
           ]),
           'op'
         )
+        .appendField('e comparar com o valor')
         .appendField(new Blockly.FieldTextInput('valor'), 'value')
         .setCheck('select_where_op');
       this.setOutput(true, 'select_where');
@@ -786,23 +797,25 @@ export function registerAdvancedSqlBlocks() {
           ]),
           'action'
         )
+        .appendField('mais uma condição na coluna')
         .appendField(new Blockly.FieldTextInput('nome_coluna'), 'variavel')
         .appendField(
           new Blockly.FieldDropdown([
-            ['diferente de', '<>'],
-            ['igual a', '='],
-            ['maior que', '>'],
-            ['menor que', '<'],
-            ['maior ou igual a', '>='],
-            ['menor ou igual a', '<='],
-            ['parecida com (LIKE)', 'LIKE'],
-            ['é', 'IS'],
-            ['não é', 'IS NOT'],
-            ['entre dois valores', 'BETWEEN'],
-            ['em uma lista de valores', 'IN']
+            ['é diferente de', '<>'],
+            ['é igual a', '='],
+            ['é maior que', '>'],
+            ['é menor que', '<'],
+            ['é maior ou igual a', '>='],
+            ['é menor ou igual a', '<='],
+            ['parecida com o texto (LIKE)', 'LIKE'],
+            ['é (IS)', 'IS'],
+            ['não é (IS NOT)', 'IS NOT'],
+            ['entre dois valores (BETWEEN)', 'BETWEEN'],
+            ['em uma lista de valores (IN)', 'IN']
           ]),
           'op'
         )
+        .appendField('comparando com o valor')
         .appendField(new Blockly.FieldTextInput('valor'), 'value')
         .setCheck('select_where_op');
       this.setOutput(true, 'select_where_op');
@@ -815,12 +828,13 @@ export function registerAdvancedSqlBlocks() {
   Blockly.Blocks['select_orderby'] = {
     init: function () {
       this.appendValueInput('orderby')
+        .appendField('Organizar usando a coluna')
         .appendField(new Blockly.FieldTextInput('nome_coluna'), 'variavel')
         .appendField(
           new Blockly.FieldDropdown([
-            ['na ordem normal', ''],
-            ['do menor para o maior', ' ASC'],
-            ['do maior para o menor', ' DESC']
+            ['da forma que vier (padrão)', ''],
+            ['do menor para o maior (ASC)', ' ASC'],
+            ['do maior para o menor (DESC)', ' DESC']
           ]),
           'op'
         )
@@ -833,15 +847,13 @@ export function registerAdvancedSqlBlocks() {
   };
 
   function addSelect() {
+    if (!Blockly.selected || isBlockInFlyout(Blockly.selected)) {
+      return;
+    }
+
     switch (Blockly.selected.getFieldValue('opcao')) {
       case 'Select':
         addVarSelect();
-        break;
-      case 'From':
-        addFromSelect();
-        break;
-      case 'Join':
-        addJoinSelect();
         break;
       case 'Where':
         addWhereSelect();
@@ -855,6 +867,10 @@ export function registerAdvancedSqlBlocks() {
   }
 
   function addVarSelect() {
+    if (!Blockly.selected || isBlockInFlyout(Blockly.selected)) {
+      return;
+    }
+
     let bloco = Blockly.selected;
     if (bloco.getInputTargetBlock('vars') != null) {
       bloco = bloco.getInputTargetBlock('vars');
@@ -863,11 +879,17 @@ export function registerAdvancedSqlBlocks() {
         bloco = bloco.getChildren(true)[0];
       }
     }
+    const connection = newBlock('select_var');
+    if (!connection) return;
 
-    bloco.getInput('vars').connection.connect(newBlock('select_var'));
+    bloco.getInput('vars').connection.connect(connection);
   }
 
   function addFromSelect() {
+    if (!Blockly.selected || isBlockInFlyout(Blockly.selected)) {
+      return;
+    }
+
     let bloco = Blockly.selected;
     if (bloco.getInputTargetBlock('from') != null) {
       bloco = bloco.getInputTargetBlock('from');
@@ -876,8 +898,10 @@ export function registerAdvancedSqlBlocks() {
         bloco = bloco.getChildren(true)[0];
       }
     }
+    const connection = newBlock('select_from');
+    if (!connection) return;
 
-    bloco.getInput('from').connection.connect(newBlock('select_from'));
+    bloco.getInput('from').connection.connect(connection);
   }
 
   function addJoinSelect() {
@@ -888,14 +912,23 @@ export function registerAdvancedSqlBlocks() {
       while (bloco.getChildren(true)[0]) {
         bloco = bloco.getChildren(true)[0];
       }
+      const connectionOp = newBlock('select_join_op');
+      if (!connectionOp) return;
 
-      bloco.getInput('join').connection.connect(newBlock('select_join_op'));
+      bloco.getInput('join').connection.connect(connectionOp);
     } else {
-      bloco.getInput('join').connection.connect(newBlock('select_join'));
+      const connectionJoin = newBlock('select_join');
+      if (!connectionJoin) return;
+
+      bloco.getInput('join').connection.connect(connectionJoin);
     }
   }
 
   function addWhereSelect() {
+    if (!Blockly.selected || isBlockInFlyout(Blockly.selected)) {
+      return;
+    }
+
     let bloco = Blockly.selected;
     if (bloco.getInputTargetBlock('conditions') != null) {
       bloco = bloco.getInputTargetBlock('conditions');
@@ -903,14 +936,23 @@ export function registerAdvancedSqlBlocks() {
       while (bloco.getChildren(true)[0]) {
         bloco = bloco.getChildren(true)[0];
       }
+      const connectionOp = newBlock('select_where_op');
+      if (!connectionOp) return;
 
-      bloco.getInput('conditions').connection.connect(newBlock('select_where_op'));
+      bloco.getInput('conditions').connection.connect(connectionOp);
     } else {
-      bloco.getInput('conditions').connection.connect(newBlock('select_where'));
+      const connection = newBlock('select_where');
+      if (!connection) return;
+
+      bloco.getInput('conditions').connection.connect(connection);
     }
   }
 
   function addOrderBySelect() {
+    if (!Blockly.selected || isBlockInFlyout(Blockly.selected)) {
+      return;
+    }
+
     let bloco;
     if (Blockly.selected.getInputTargetBlock('orderby') != null) {
       bloco = Blockly.selected.getInputTargetBlock('orderby');
@@ -922,6 +964,9 @@ export function registerAdvancedSqlBlocks() {
       bloco = Blockly.selected;
     }
 
-    bloco.getInput('orderby').connection.connect(newBlock('select_orderby'));
+    const connection = newBlock('select_orderby');
+    if (!connection) return;
+
+    bloco.getInput('orderby').connection.connect(connection);
   }
 }

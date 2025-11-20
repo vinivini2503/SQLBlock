@@ -2,26 +2,22 @@
   <div class="blockly-container">
     <!-- Header -->
     <header class="header">
-      <button class="btn-voltar" @click="voltar">
+      <router-link to="/" class="btn-voltar">
         <span class="arrow">←</span> Voltar
-      </button>
+      </router-link>
 
       <div class="header-title">
-        <svg class="db-icon" width="40" height="40" viewBox="0 0 40 40" fill="none">
-          <ellipse cx="20" cy="12" rx="15" ry="6" fill="white"/>
-          <path d="M5 12 V20 Q5 26 20 26 Q35 26 35 20 V12" fill="white"/>
-          <path d="M5 20 V28 Q5 34 20 34 Q35 34 35 28 V20" fill="white"/>
-        </svg>
+        <img :src="logo" alt="Logo SQL Block" class="db-icon" />
         <h1>SQL BLOCK</h1>
       </div>
 
       <div class="header-actions">
         <button class="btn-header" @click="exportarSQL">
-          <span class="icon">📄</span>
+          <img :src="exportIcon" alt="Exportar" class="icon" />
           <span>Exportar para SQL</span>
         </button>
         <button class="btn-header" @click="salvarProjeto">
-          <span class="icon">💾</span>
+          <img :src="saveIcon" alt="Salvar" class="icon" />
           <span>Salvar</span>
         </button>
       </div>
@@ -31,7 +27,7 @@
       <!-- Área do Blockly Workspace -->
       <div class="workspace-area">
         <div v-if="!workspaceIniciado" class="workspace-placeholder">
-          <p>Arraste os blocos da toolbox para começar</p>
+          <p>Arraste os blocos da lateral para começar</p>
         </div>
         <div ref="blocklyDiv" class="blockly-workspace"></div>
 
@@ -71,11 +67,17 @@ import { registerAdvancedSqlBlocks } from '@/blockly/blocks/sqlBlocks';
 
 // Importar CSS
 import '@/assets/css/workspace.css';
+import logo from '@/assets/images/logoWhite.png';
+import exportIcon from '@/assets/images/export.png';
+import saveIcon from '@/assets/images/save.png';
 
 export default {
   name: 'BlocklyView',
   data() {
     return {
+      logo,
+      exportIcon,
+      saveIcon,
       workspace: null,
       workspaceIniciado: false,
       codigoSQL: '',
@@ -90,7 +92,12 @@ export default {
   },
   beforeUnmount() {
     if (this.workspace) {
-      this.workspace.dispose();
+      try {
+        this.workspace.dispose();
+      } catch (error) {
+        console.error('Erro ao destruir workspace Blockly:', error);
+      }
+      this.workspace = null;
     }
   },
   methods: {
@@ -139,7 +146,7 @@ export default {
           },
           {
             kind: 'category',
-            name: 'Consultas (SELECT simples)',
+            name: 'Ver dados (SELECT)',
             colour: '#5CA65C',
             contents: [
               { kind: 'block', type: 'select' },
@@ -237,7 +244,7 @@ export default {
     },
 
     voltar() {
-      this.$router.push('/projetos');
+      this.$router.push('/');
     }
   }
 };
