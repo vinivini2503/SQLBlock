@@ -65,8 +65,7 @@ import 'blockly/blocks';
 // Importar blocos SQL avançados (versão única usada pelo app)
 import { registerAdvancedSqlBlocks } from '@/blockly/blocks/sqlBlocks';
 
-// Importar CSS
-import '@/assets/css/workspace.css';
+// Importar imagens
 import logo from '@/assets/images/logoWhite.png';
 import exportIcon from '@/assets/images/export.png';
 import saveIcon from '@/assets/images/save.png';

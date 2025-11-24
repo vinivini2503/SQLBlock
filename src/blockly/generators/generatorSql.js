@@ -1,8 +1,6 @@
 import * as Blockly from 'blockly/core';
 
-/**
- * Gerador SQL customizado para os blocos
- */
+
 export class SqlGenerator extends Blockly.Generator {
   constructor() {
     super('SQL');
@@ -266,7 +264,7 @@ SqlGenerator.prototype.forBlock_ = sqlGenerator.forBlock_ = {
     return `SELECT${distinct} ${cols}${fromSql};\n`;
   },
 
-  // Variações adicionais do bloco principal de SELECT (mesma lógica de 'select')
+  // Variações adicionais do bloco principal de SELECT (mesma lógica do select)
   select3(block, generator) {
     const distinct = block.getFieldValue('option') || '';
     const [varsCode] = generator.valueToCode(block, 'vars', generator.ORDER_NONE);

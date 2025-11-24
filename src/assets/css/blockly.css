@@ -1,5 +1,3 @@
-/* Blockly CSS - Estilos básicos necessários */
-
 /* Container principal do Blockly */
 .blocklySvg {
   background-color: #fff;
@@ -62,7 +60,7 @@
   color: #333;
 }
 
-/* Flyout (menu lateral de blocos) */
+/* Flyout */
 .blocklyFlyout {
   background-color: #fff;
   border-right: 1px solid #ddd;
