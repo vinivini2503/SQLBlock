@@ -1,6 +1,5 @@
 import * as Blockly from 'blockly/core';
 
-
 export class SqlGenerator extends Blockly.Generator {
   constructor() {
     super('SQL');
@@ -13,6 +12,7 @@ export class SqlGenerator extends Blockly.Generator {
    * Se não existir gerador para o tipo do bloco, retorna string vazia
    * em vez de lançar erro.
    */
+
   blockToCode(block) {
     if (!block) {
       return '';
