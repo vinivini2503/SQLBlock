@@ -6,8 +6,8 @@
 2. Seja feliz :) 
 
 ## Alternativa 2, rodando na sua máquina
-1. **Clone o repositório do sistema**
-2. **Abra o terminal** e navegue até a pasta do projeto
+1. **Clone o repositório da aplicação em sua máquina**
+2. **e navegue até a pasta do projeto**
 3. Execute:
    ```bash
    npm install
